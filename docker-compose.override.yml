@@ -1,0 +1,44 @@
+# =============================================================================
+#  EventHub — surcharges de DÉVELOPPEMENT
+#
+#  Chargé AUTOMATIQUEMENT par « docker compose up ». Aucune option à passer.
+#  Ne jamais l'utiliser en production : voir docker-compose.prod.yml.
+#
+#  Ce qu'il apporte :
+#   · les ports des services sont publiés → accès direct à /docs (Swagger)
+#   · le code est monté depuis l'hôte → modification prise en compte en 1 s
+#     au lieu de reconstruire l'image (~40 s)
+# =============================================================================
+services:
+
+  postgres:
+    ports:
+      # Accès direct depuis DBeaver, pgAdmin ou psql.
+      - "5432:5432"
+
+  events-service:
+    ports:
+      - "8001:8001"
+    environment:
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./events-service/app:/app/app:ro
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+
+  participants-service:
+    ports:
+      - "8002:8002"
+    environment:
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./participants-service/app:/app/app:ro
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]
+
+  registrations-service:
+    ports:
+      - "8003:8003"
+    environment:
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./registrations-service/app:/app/app:ro
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8003", "--reload"]

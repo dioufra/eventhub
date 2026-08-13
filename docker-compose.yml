@@ -87,7 +87,7 @@ services:
     container_name: eventhub-registrations
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_registrations
+      DATABASE_URL: postgresql+pg8000://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_registrations
       EVENTS_SERVICE_URL: http://events-service:8001
       PARTICIPANTS_SERVICE_URL: http://participants-service:8002
       SERVICE_NAME: registrations-service

@@ -1,0 +1,160 @@
+# =============================================================================
+#  EventHub — orchestration principale
+#  Architecture B : gateway dédiée, seul service exposé vers l'extérieur.
+# =============================================================================
+name: eventhub
+
+services:
+
+  # ===========================================================================
+  # BASE DE DONNÉES — 1 instance, 3 bases logiques
+  # ===========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: eventhub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+    volumes:
+      # Volume nommé : les données survivent à « docker compose down ».
+      - pgdata:/var/lib/postgresql/data
+      # Scripts joués UNE SEULE FOIS, au tout premier démarrage.
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - eventhub-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ===========================================================================
+  # MICROSERVICE 1 — ÉVÉNEMENTS          (Berly)
+  # ===========================================================================
+  events-service:
+    build:
+      context: ./events-service
+    image: ${REGISTRY:-eventhub}/eventhub-events-service:${TAG:-latest}
+    container_name: eventhub-events
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_events
+      SERVICE_NAME: events-service
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - eventhub-net
+    logging: *default-logging
+
+  # ===========================================================================
+  # MICROSERVICE 2 — PARTICIPANTS        (Kra)
+  # ===========================================================================
+  participants-service:
+    build:
+      context: ./participants-service
+    image: ${REGISTRY:-eventhub}/eventhub-participants-service:${TAG:-latest}
+    container_name: eventhub-participants
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_participants
+      SERVICE_NAME: participants-service
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - eventhub-net
+    logging: *default-logging
+
+  # ===========================================================================
+  # MICROSERVICE 3 — INSCRIPTIONS        (Mohamed)
+  # Seul service qui appelle les deux autres : NOM DE SERVICE + PORT INTERNE.
+  # ===========================================================================
+  registrations-service:
+    build:
+      context: ./registrations-service
+    image: ${REGISTRY:-eventhub}/eventhub-registrations-service:${TAG:-latest}
+    container_name: eventhub-registrations
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+pg8000://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_registrations
+      EVENTS_SERVICE_URL: http://events-service:8001
+      PARTICIPANTS_SERVICE_URL: http://participants-service:8002
+      SERVICE_NAME: registrations-service
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      events-service:
+        condition: service_healthy
+      participants-service:
+        condition: service_healthy
+    networks:
+      - eventhub-net
+    logging: *default-logging
+
+  # ===========================================================================
+  # FRONTEND — Angular servi par Nginx. AUCUN port publié : c'est la
+  # gateway qui l'expose (architecture B).
+  # ===========================================================================
+  frontend:
+    build:
+      context: ./frontend
+    image: ${REGISTRY:-eventhub}/eventhub-frontend:${TAG:-latest}
+    container_name: eventhub-frontend
+    restart: unless-stopped
+    networks:
+      - eventhub-net
+    logging: *default-logging
+
+  # ===========================================================================
+  # GATEWAY — SEUL SERVICE EXPOSÉ
+  # Nginx résout les upstreams au démarrage : les 4 conditions
+  # « service_healthy » ci-dessous sont indispensables, sans elles la
+  # gateway refuse de démarrer (« host not found in upstream »).
+  # ===========================================================================
+  gateway:
+    build:
+      context: ./gateway
+    image: ${REGISTRY:-eventhub}/eventhub-gateway:${TAG:-latest}
+    container_name: eventhub-gateway
+    restart: unless-stopped
+    ports:
+      - "${GATEWAY_PORT:-8080}:80"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      events-service:
+        condition: service_healthy
+      participants-service:
+        condition: service_healthy
+      registrations-service:
+        condition: service_healthy
+    networks:
+      - eventhub-net
+    logging: *default-logging
+
+# =============================================================================
+# RÉSEAU — bridge nommé : isole le projet et active le DNS interne Docker,
+# qui permet à « http://events-service:8001 » de fonctionner sans configuration.
+# =============================================================================
+networks:
+  eventhub-net:
+    driver: bridge
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  pgdata:
+    driver: local

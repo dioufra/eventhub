@@ -1,0 +1,110 @@
+# =============================================================================
+#  EventHub — fichiers exclus du dépôt Git
+#  Équipe 6 · Master 1 IA · DIT
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. SECRETS
+# -----------------------------------------------------------------------------
+.env
+.env.*
+
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+secrets/
+
+# -----------------------------------------------------------------------------
+# 2. PYTHON — les trois microservices
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+ENV/
+
+# Tests et couverture
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+test-results.xml
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Empaquetage
+build/
+dist/
+*.egg-info/
+
+# -----------------------------------------------------------------------------
+# 3. ANGULAR / NODE — le frontend
+# -----------------------------------------------------------------------------
+node_modules/
+
+# Résultat du build : reconstruit par Docker, jamais versionné
+dist/
+out-tsc/
+bazel-out/
+
+# Cache du CLI Angular — peut atteindre plusieurs Go
+.angular/
+
+# Couverture des tests Angular
+coverage/
+
+# Logs npm / yarn
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# -----------------------------------------------------------------------------
+# 4. DOCKER ET BASE DE DONNÉES
+# -----------------------------------------------------------------------------
+# Sauvegardes produites par « make backup »
+backup-*.sql
+*.dump
+
+# Données de base montées en bind-mount (si un jour utilisé à la place
+# du volume nommé pgdata)
+pgdata/
+postgres-data/
+
+# -----------------------------------------------------------------------------
+# 5. ÉDITEURS ET IDE
+# -----------------------------------------------------------------------------
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+.vscode/
+
+# -----------------------------------------------------------------------------
+# 6. SYSTÈME D'EXPLOITATION
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -----------------------------------------------------------------------------
+# 7. DIVERS
+# -----------------------------------------------------------------------------
+*.log
+logs/
+tmp/
+*.tmp
+*.bak

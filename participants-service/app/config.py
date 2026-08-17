@@ -1,0 +1,8 @@
+import os
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+pg8000://eventhub:changez-moi-en-mot-de-passe-fort@localhost:5432/eventhub_participants",
+)
+SERVICE_NAME = os.getenv("SERVICE_NAME", "participants-service")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

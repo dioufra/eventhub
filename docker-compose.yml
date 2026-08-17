@@ -46,7 +46,7 @@ services:
     container_name: eventhub-events
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_events
+      DATABASE_URL: postgresql+pg8000://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_events
       SERVICE_NAME: events-service
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     depends_on:
@@ -66,7 +66,7 @@ services:
     container_name: eventhub-participants
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_participants
+      DATABASE_URL: postgresql+pg8000://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/eventhub_participants
       SERVICE_NAME: participants-service
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     depends_on:

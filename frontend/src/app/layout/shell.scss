@@ -1,0 +1,154 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--sidebar-width);
+  background: var(--dit-teal-dark);
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  z-index: 50;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.5rem 1.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand__mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--dit-orange);
+  color: var(--dit-teal-dark);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+.brand__text strong {
+  color: #fff;
+  font-size: 1.02rem;
+}
+.brand__text span {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ---------- Navigation ---------- */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.nav__link {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.nav__link:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+/* L'accent orange DIT marque l'élément actif. */
+.nav__link--active {
+  background: rgba(248, 169, 12, 0.14);
+  border-left-color: var(--dit-orange);
+  color: #fff;
+  font-weight: 600;
+}
+
+.nav__icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.sidebar__footer {
+  margin: 1.5rem 0 0;
+  padding: 0 0.75rem;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ---------- Contenu ---------- */
+.content {
+  margin-left: var(--sidebar-width);
+  padding: 2.25rem 2.5rem 4rem;
+  max-width: 1240px;
+}
+
+/* ---------- Mobile ---------- */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  background: var(--dit-teal-dark);
+  color: #fff;
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 50, 58, 0.5);
+  z-index: 45;
+}
+
+@media (max-width: 900px) {
+  .menu-toggle {
+    display: flex;
+  }
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar--open {
+    transform: translateX(0);
+  }
+  .content {
+    margin-left: 0;
+    padding: 1.5rem 1.15rem 3rem;
+  }
+}

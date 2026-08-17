@@ -58,6 +58,14 @@ export interface RegistrationsServiceInterface {
     listByParticipant(participantId: number, extraHttpRequestParams?: any): Observable<Array<RegistrationOut>>;
 
     /**
+     * Lister toutes les inscriptions
+     * Liste toutes les inscriptions, filtrables par statut.
+     * @endpoint get /api/registrations
+     * @param statusFilter 
+     */
+    listRegistrations(statusFilter?: string, extraHttpRequestParams?: any): Observable<Array<RegistrationOut>>;
+
+    /**
      * Statistiques d\&#39;inscription
      * 
      * @endpoint get /api/registrations/stats

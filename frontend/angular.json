@@ -33,6 +33,10 @@
               }
             ],
             "styles": [
+              "node_modules/@fontsource/poppins/400.css",
+              "node_modules/@fontsource/poppins/500.css",
+              "node_modules/@fontsource/poppins/600.css",
+              "node_modules/@fontsource/poppins/700.css",
               "src/styles.scss"
             ]
           },

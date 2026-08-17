@@ -1,0 +1,7 @@
+# Code généré depuis les specs OpenAPI : ne pas reformater
+src/app/core/api/
+openapi/
+dist/
+.angular/
+node_modules/
+package-lock.json

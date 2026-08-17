@@ -1,0 +1,17 @@
+{
+  "/api/events": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/participants": {
+    "target": "http://localhost:8002",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/api/registrations": {
+    "target": "http://localhost:8003",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

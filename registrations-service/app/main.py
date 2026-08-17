@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Response, status
+from fastapi.routing import APIRoute
 from sqlalchemy import text
 
 from app import config
@@ -13,6 +14,17 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
 )
 logger = logging.getLogger(config.SERVICE_NAME)
+
+
+def custom_generate_unique_id(route: APIRoute) -> str:
+    """Nomme chaque opération d'après le nom de la fonction Python.
+
+    Sans cela, FastAPI génère des identifiants du type
+    « list_events_api_events_get », et openapi-generator produit des
+    méthodes TypeScript illisibles (listEventsApiEventsGet).
+    Avec, on obtient simplement listEvents().
+    """
+    return route.name
 
 
 @asynccontextmanager
@@ -33,6 +45,7 @@ app = FastAPI(
     description="Microservice de gestion des inscriptions à des événements",
     version="1.0.0",
     lifespan=lifespan,
+    generate_unique_id_function=custom_generate_unique_id,
 )
 
 # La gateway route /api/registrations : le service doit répondre sur ce

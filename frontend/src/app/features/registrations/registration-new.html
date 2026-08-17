@@ -1,0 +1,180 @@
+<app-page-header
+  title="Nouvelle inscription"
+  subtitle="Sélectionnez un événement puis un participant, vérifiez le résumé et confirmez."
+>
+  <a class="btn btn--ghost" routerLink="/registrations">Retour</a>
+</app-page-header>
+
+@if (loading()) {
+  <section class="card"><app-state-panel mode="loading" /></section>
+} @else if (loadError()) {
+  <section class="card">
+    <app-state-panel
+      mode="error"
+      [message]="loadError()!"
+      retryLabel="Réessayer"
+      (retry)="load()"
+    />
+  </section>
+} @else if (!events().length || !participants().length) {
+  <section class="card">
+    <app-state-panel
+      mode="empty"
+      title="Données manquantes"
+      [message]="
+        !events().length
+          ? 'Créez d’abord un événement avant de pouvoir inscrire quelqu’un.'
+          : 'Ajoutez d’abord un participant avant de pouvoir créer une inscription.'
+      "
+    >
+      @if (!events().length) {
+        <a class="btn btn--primary" routerLink="/events/new">Créer un événement</a>
+      } @else {
+        <a class="btn btn--primary" routerLink="/participants/new">Ajouter un participant</a>
+      }
+    </app-state-panel>
+  </section>
+} @else {
+  @if (error()) {
+    <p class="alert alert--error">{{ error() }}</p>
+  }
+
+  <div class="wizard">
+    <div class="wizard__steps">
+      <!-- Étape 1 — événement -->
+      <section class="card step">
+        <div class="card__header">
+          <h3><span class="step__num">1</span> Sélectionner un événement</h3>
+        </div>
+        <div class="card__body">
+          <div class="choices">
+            @for (event of events(); track event.id) {
+              <label
+                class="choice"
+                [class.choice--on]="selectedEventId === event.id"
+                [class.choice--off]="event.availability?.is_full"
+              >
+                <input type="radio" name="event" [value]="event.id" [(ngModel)]="selectedEventId" />
+                <span class="choice__main">
+                  <span class="choice__title">{{ event.title }}</span>
+                  <span class="choice__meta">
+                    {{ event.starts_at | date: 'dd/MM/yyyy · HH:mm' }} — {{ event.location }}
+                  </span>
+                </span>
+                @if (event.availability; as av) {
+                  @if (av.is_full) {
+                    <span class="badge badge--full">Complet</span>
+                  } @else {
+                    <span class="badge badge--open">{{ av.seats_available }} places</span>
+                  }
+                }
+              </label>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Étape 2 — participant -->
+      <section class="card step" [class.step--muted]="!selectedEventId">
+        <div class="card__header">
+          <h3><span class="step__num">2</span> Sélectionner un participant</h3>
+        </div>
+        <div class="card__body">
+          <div class="field">
+            <label class="field__label" for="pfilter">Rechercher</label>
+            <input
+              id="pfilter"
+              class="input"
+              type="search"
+              [(ngModel)]="participantFilter"
+              placeholder="Nom ou email"
+            />
+          </div>
+
+          @if (!filteredParticipants().length) {
+            <p class="cell-muted">Aucun participant ne correspond à cette recherche.</p>
+          } @else {
+            <div class="choices choices--scroll">
+              @for (p of filteredParticipants(); track p.id) {
+                <label class="choice" [class.choice--on]="selectedParticipantId === p.id">
+                  <input
+                    type="radio"
+                    name="participant"
+                    [value]="p.id"
+                    [(ngModel)]="selectedParticipantId"
+                  />
+                  <span class="choice__main">
+                    <span class="choice__title">{{ p.full_name }}</span>
+                    <span class="choice__meta">{{ p.email }}</span>
+                  </span>
+                  <span class="badge badge--{{ p.type }}">{{ typeLabel(p.type) }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- Étape 3 — résumé -->
+    <aside class="summary">
+      <section class="card">
+        <div class="card__header"><h3>Résumé de l’inscription</h3></div>
+        <div class="card__body">
+          @if (!canReview()) {
+            <p class="cell-muted summary__hint">
+              Sélectionnez un événement et un participant pour voir le résumé.
+            </p>
+          } @else {
+            <dl class="facts">
+              <div>
+                <dt>Événement</dt>
+                <dd>{{ selectedEvent()!.title }}</dd>
+              </div>
+              <div>
+                <dt>Date</dt>
+                <dd>{{ selectedEvent()!.starts_at | date: 'dd/MM/yyyy · HH:mm' }}</dd>
+              </div>
+              <div>
+                <dt>Lieu</dt>
+                <dd>{{ selectedEvent()!.location }}</dd>
+              </div>
+              <div>
+                <dt>Participant</dt>
+                <dd>
+                  {{ selectedParticipant()!.full_name }}
+                  <span class="cell-muted">{{ selectedParticipant()!.email }}</span>
+                </dd>
+              </div>
+              <div>
+                <dt>Places restantes</dt>
+                <dd>
+                  @if (seatsLeft() !== null) {
+                    <strong>{{ seatsLeft() }}</strong>
+                  } @else {
+                    —
+                  }
+                </dd>
+              </div>
+            </dl>
+
+            @if (isFull()) {
+              <p class="alert alert--error summary__full">
+                Événement complet — aucune place disponible.
+              </p>
+            }
+
+            <button
+              type="button"
+              class="btn btn--primary summary__cta"
+              [disabled]="!canConfirm()"
+              (click)="submit()"
+            >
+              {{ submitting() ? 'Inscription en cours…' : 'Confirmer l’inscription' }}
+            </button>
+          }
+        </div>
+      </section>
+    </aside>
+  </div>
+}

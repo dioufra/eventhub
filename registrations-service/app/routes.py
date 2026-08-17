@@ -68,6 +68,21 @@ def list_by_participant(participant_id: int, db: Session = Depends(get_db)):
     )
 
 
+@router.get(
+    "",
+    response_model=List[schemas.RegistrationOut],
+    summary="Lister toutes les inscriptions",
+)
+def list_registrations(
+    status_filter: str | None = None, db: Session = Depends(get_db)
+):
+    """Liste toutes les inscriptions, filtrables par statut."""
+    query = db.query(models.Registration)
+    if status_filter:
+        query = query.filter(models.Registration.status == status_filter)
+    return query.order_by(models.Registration.id.desc()).all()
+
+
 @router.post(
     "",
     response_model=schemas.RegistrationOut,

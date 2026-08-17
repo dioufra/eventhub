@@ -1,0 +1,110 @@
+<app-page-header title="Participants" subtitle="Gérez les participants aux événements du DIT.">
+  <a class="btn btn--primary" routerLink="/participants/new">Ajouter un participant</a>
+</app-page-header>
+
+@if (success()) {
+  <p class="alert alert--success">{{ success() }}</p>
+}
+@if (error() && rows().length) {
+  <p class="alert alert--error">{{ error() }}</p>
+}
+
+<section class="card">
+  <div class="toolbar">
+    <div class="field">
+      <label class="field__label" for="search">Rechercher</label>
+      <input
+        id="search"
+        class="input"
+        type="search"
+        [(ngModel)]="search"
+        placeholder="Nom ou adresse email"
+        (keyup.enter)="load()"
+      />
+    </div>
+    <div class="toolbar__actions">
+      <button type="button" class="btn btn--teal" (click)="load()">Rechercher</button>
+      @if (search) {
+        <button type="button" class="btn btn--ghost" (click)="resetSearch()">Effacer</button>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-state-panel mode="loading" title="Chargement des participants…" />
+  } @else if (error() && !rows().length) {
+    <app-state-panel mode="error" [message]="error()!" retryLabel="Réessayer" (retry)="load()" />
+  } @else if (!rows().length) {
+    <app-state-panel
+      mode="empty"
+      [title]="search ? 'Aucun résultat' : 'Aucun participant'"
+      [message]="
+        search
+          ? 'Aucun participant ne correspond à cette recherche.'
+          : 'Ajoutez votre premier participant pour pouvoir créer des inscriptions.'
+      "
+    >
+      @if (search) {
+        <button type="button" class="btn btn--ghost" (click)="resetSearch()">
+          Effacer la recherche
+        </button>
+      } @else {
+        <a class="btn btn--primary" routerLink="/participants/new">Ajouter un participant</a>
+      }
+    </app-state-panel>
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Type</th>
+            <th class="col-actions"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.id) {
+            <tr>
+              <td class="cell-strong">{{ row.full_name }}</td>
+              <td class="cell-muted">{{ row.email }}</td>
+              <td class="cell-muted">{{ row.phone || '—' }}</td>
+              <td>
+                <span class="badge badge--{{ row.type }}">{{ typeLabel(row.type) }}</span>
+              </td>
+              <td>
+                <div class="table__actions">
+                  <a class="btn btn--ghost btn--sm" [routerLink]="['/participants', row.id, 'edit']"
+                    >Modifier</a
+                  >
+                  <button
+                    type="button"
+                    class="btn btn--danger btn--sm"
+                    (click)="pendingDelete.set(row)"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (pendingDelete(); as target) {
+  <app-confirm-dialog
+    title="Supprimer ce participant ?"
+    [message]="
+      target.full_name +
+      ' sera définitivement supprimé. Ses inscriptions existantes ne seront pas annulées automatiquement.'
+    "
+    confirmLabel="Supprimer"
+    [busy]="deleting()"
+    (confirm)="confirmDelete()"
+    (cancel)="pendingDelete.set(null)"
+  />
+}

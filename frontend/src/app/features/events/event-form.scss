@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.form-card {
+  max-width: 760px;
+}
+.form-card .card__body {
+  padding: 2rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1.25rem;
+}
+.field--narrow {
+  max-width: 260px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--dit-border);
+}
+
+@media (max-width: 680px) {
+  .form-card .card__body {
+    padding: 1.35rem;
+  }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .field--narrow {
+    max-width: none;
+  }
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  .form-actions .btn {
+    width: 100%;
+  }
+}

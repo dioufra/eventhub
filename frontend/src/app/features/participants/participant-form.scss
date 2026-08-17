@@ -1,0 +1,93 @@
+:host {
+  display: block;
+}
+.form-card {
+  max-width: 760px;
+}
+.form-card .card__body {
+  padding: 2rem;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1.25rem;
+}
+
+.types {
+  border: 0;
+  padding: 0;
+  margin-bottom: 1.35rem;
+}
+.types legend {
+  padding: 0;
+  margin-bottom: 0.55rem;
+}
+.types__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+}
+
+.type-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  border: 1px solid var(--dit-border);
+  border-radius: var(--radius-sm);
+  background: var(--dit-white);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.type-card:hover {
+  border-color: var(--dit-teal);
+}
+.type-card input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.type-card__label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.type-card__hint {
+  font-size: 0.76rem;
+  color: var(--dit-text-muted);
+}
+.type-card--on {
+  border-color: var(--dit-orange);
+  background: var(--dit-orange-soft);
+}
+.type-card:focus-within {
+  outline: 2px solid var(--dit-orange);
+  outline-offset: 2px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--dit-border);
+}
+
+@media (max-width: 680px) {
+  .form-card .card__body {
+    padding: 1.35rem;
+  }
+  .grid-2,
+  .types__grid {
+    grid-template-columns: 1fr;
+  }
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  .form-actions .btn {
+    width: 100%;
+  }
+}

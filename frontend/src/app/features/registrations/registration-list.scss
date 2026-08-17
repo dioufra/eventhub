@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+.col-actions {
+  width: 1%;
+}
+@media (max-width: 720px) {
+  .table__actions {
+    justify-content: flex-start;
+  }
+}

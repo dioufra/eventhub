@@ -1,8 +1,7 @@
 :host {
   display: block;
 }
-
-.filters {
+.toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -10,32 +9,28 @@
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--dit-border);
 }
-.filters .field {
+.toolbar .field {
   margin-bottom: 0;
-  min-width: 190px;
+  flex: 1;
+  min-width: 220px;
+  max-width: 380px;
 }
-.filters__actions {
+.toolbar__actions {
   display: flex;
   gap: 0.5rem;
-  margin-left: auto;
 }
-
 .col-actions {
   width: 1%;
 }
-.cell-muted {
-  margin-top: 0.15rem;
-}
-
-@media (max-width: 720px) {
-  .filters .field {
+@media (max-width: 680px) {
+  .toolbar .field {
+    max-width: none;
     flex: 1 1 100%;
   }
-  .filters__actions {
-    margin-left: 0;
+  .toolbar__actions {
     width: 100%;
   }
-  .filters__actions .btn {
+  .toolbar__actions .btn {
     flex: 1;
   }
   .table__actions {

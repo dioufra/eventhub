@@ -1,0 +1,92 @@
+<app-page-header
+  [title]="isEdit() ? 'Modifier le participant' : 'Ajouter un participant'"
+  subtitle="Renseignez les informations du participant."
+>
+  <a class="btn btn--ghost" routerLink="/participants">Retour à la liste</a>
+</app-page-header>
+
+@if (loading()) {
+  <section class="card"><app-state-panel mode="loading" /></section>
+} @else {
+  <section class="card form-card">
+    <div class="card__body">
+      @if (error()) {
+        <p class="alert alert--error">{{ error() }}</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label class="field__label" for="full_name">Nom complet <span class="req">*</span></label>
+          <input
+            id="full_name"
+            class="input"
+            type="text"
+            formControlName="full_name"
+            placeholder="Aïchatou Ndaw"
+            [class.is-invalid]="showError('full_name')"
+          />
+          @if (showError('full_name')) {
+            <span class="field__error">{{ errorFor('full_name') }}</span>
+          }
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label class="field__label" for="email">Email <span class="req">*</span></label>
+            <input
+              id="email"
+              class="input"
+              type="email"
+              formControlName="email"
+              placeholder="prenom.nom@dit.sn"
+              [class.is-invalid]="showError('email')"
+            />
+            @if (showError('email')) {
+              <span class="field__error">{{ errorFor('email') }}</span>
+            } @else {
+              <span class="field__hint">Doit être unique.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="phone">Téléphone</label>
+            <input
+              id="phone"
+              class="input"
+              type="tel"
+              formControlName="phone"
+              placeholder="+221 77 000 00 00"
+              [class.is-invalid]="showError('phone')"
+            />
+            @if (showError('phone')) {
+              <span class="field__error">{{ errorFor('phone') }}</span>
+            }
+          </div>
+        </div>
+
+        <fieldset class="field types">
+          <legend class="field__label">Type de participant <span class="req">*</span></legend>
+          <div class="types__grid">
+            @for (opt of typeOptions; track opt.value) {
+              <label
+                class="type-card"
+                [class.type-card--on]="form.controls.type.value === opt.value"
+              >
+                <input type="radio" formControlName="type" [value]="opt.value" />
+                <span class="type-card__label">{{ opt.label }}</span>
+                <span class="type-card__hint">{{ opt.hint }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <a class="btn btn--ghost" routerLink="/participants">Annuler</a>
+          <button type="submit" class="btn btn--primary" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : isEdit() ? 'Enregistrer' : 'Ajouter le participant' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+}

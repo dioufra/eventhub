@@ -1,0 +1,112 @@
+<app-page-header
+  [title]="isEdit() ? 'Modifier l’événement' : 'Créer un événement'"
+  subtitle="Renseignez les informations nécessaires à la création de l’événement."
+>
+  <a class="btn btn--ghost" routerLink="/events">Retour à la liste</a>
+</app-page-header>
+
+@if (loading()) {
+  <section class="card"><app-state-panel mode="loading" /></section>
+} @else {
+  <section class="card form-card">
+    <div class="card__body">
+      @if (error()) {
+        <p class="alert alert--error">{{ error() }}</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label class="field__label" for="title">Titre <span class="req">*</span></label>
+          <input
+            id="title"
+            class="input"
+            type="text"
+            formControlName="title"
+            placeholder="Conférence DevOps"
+            [class.is-invalid]="showError('title')"
+          />
+          @if (showError('title')) {
+            <span class="field__error">{{ errorFor('title') }}</span>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="description">Description</label>
+          <textarea
+            id="description"
+            class="textarea"
+            formControlName="description"
+            placeholder="Présentation des pratiques CI/CD modernes."
+          ></textarea>
+          <span class="field__hint">Optionnel — affiché sous le titre dans la liste.</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label class="field__label" for="starts_at"
+              >Date et heure <span class="req">*</span></label
+            >
+            <input
+              id="starts_at"
+              class="input"
+              type="datetime-local"
+              formControlName="starts_at"
+              [class.is-invalid]="showError('starts_at')"
+            />
+            @if (showError('starts_at')) {
+              <span class="field__error">{{ errorFor('starts_at') }}</span>
+            }
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="location">Lieu <span class="req">*</span></label>
+            <input
+              id="location"
+              class="input"
+              type="text"
+              formControlName="location"
+              placeholder="Amphi A"
+              [class.is-invalid]="showError('location')"
+            />
+            @if (showError('location')) {
+              <span class="field__error">{{ errorFor('location') }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="field field--narrow">
+          <label class="field__label" for="capacity"
+            >Capacité maximale <span class="req">*</span></label
+          >
+          <input
+            id="capacity"
+            class="input"
+            type="number"
+            min="1"
+            max="10000"
+            formControlName="capacity"
+            [class.is-invalid]="showError('capacity')"
+          />
+          @if (showError('capacity')) {
+            <span class="field__error">{{ errorFor('capacity') }}</span>
+          } @else {
+            <span class="field__hint">Nombre de places disponibles pour cet événement.</span>
+          }
+        </div>
+
+        <div class="form-actions">
+          <a class="btn btn--ghost" routerLink="/events">Annuler</a>
+          <button type="submit" class="btn btn--primary" [disabled]="saving()">
+            {{
+              saving()
+                ? 'Enregistrement…'
+                : isEdit()
+                  ? 'Enregistrer les modifications'
+                  : 'Créer l’événement'
+            }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+}

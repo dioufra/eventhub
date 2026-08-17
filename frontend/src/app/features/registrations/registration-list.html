@@ -1,0 +1,97 @@
+<app-page-header
+  title="Inscriptions"
+  subtitle="Suivez les inscriptions confirmées aux événements du DIT."
+>
+  <a class="btn btn--primary" routerLink="/registrations/new">Nouvelle inscription</a>
+</app-page-header>
+
+@if (success()) {
+  <p class="alert alert--success">{{ success() }}</p>
+}
+@if (error() && rows().length) {
+  <p class="alert alert--error">{{ error() }}</p>
+}
+
+<section class="card">
+  @if (loading()) {
+    <app-state-panel mode="loading" title="Chargement des inscriptions…" />
+  } @else if (error() && !rows().length) {
+    <app-state-panel mode="error" [message]="error()!" retryLabel="Réessayer" (retry)="load()" />
+  } @else if (!rows().length) {
+    <app-state-panel
+      mode="empty"
+      title="Aucune inscription"
+      message="Inscrivez un participant à un événement pour commencer."
+    >
+      <a class="btn btn--primary" routerLink="/registrations/new">Nouvelle inscription</a>
+    </app-state-panel>
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Participant</th>
+            <th>Événement</th>
+            <th>Date de l’événement</th>
+            <th>Lieu</th>
+            <th>Inscrit le</th>
+            <th class="col-actions"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.id) {
+            <tr>
+              <td>
+                <div class="cell-strong">{{ row.participantName }}</div>
+                <div class="cell-muted">{{ row.participantEmail }}</div>
+              </td>
+              <td class="cell-strong">{{ row.eventTitle }}</td>
+              <td>
+                @if (row.eventDate) {
+                  {{ row.eventDate | date: 'dd/MM/yyyy · HH:mm' }}
+                } @else {
+                  <span class="cell-muted">—</span>
+                }
+              </td>
+              <td>{{ row.eventLocation }}</td>
+              <td class="cell-muted">
+                @if (row.createdAt) {
+                  {{ row.createdAt | date: 'dd/MM/yyyy' }}
+                } @else {
+                  —
+                }
+              </td>
+              <td>
+                <div class="table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--danger btn--sm"
+                    (click)="pendingCancel.set(row)"
+                  >
+                    Annuler l’inscription
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (pendingCancel(); as target) {
+  <app-confirm-dialog
+    title="Annuler cette inscription ?"
+    [message]="
+      target.participantName +
+      ' sera désinscrit de « ' +
+      target.eventTitle +
+      ' ». La place sera immédiatement rendue disponible.'
+    "
+    confirmLabel="Annuler l’inscription"
+    [busy]="cancelling()"
+    (confirm)="confirmCancel()"
+    (cancel)="pendingCancel.set(null)"
+  />
+}

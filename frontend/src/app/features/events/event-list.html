@@ -1,0 +1,51 @@
+<h2>Événements</h2>
+
+<div class="filters">
+  <label>
+    Lieu
+    <input type="text" [(ngModel)]="location" placeholder="Amphi A" (keyup.enter)="load()" />
+  </label>
+  <label>
+    Date
+    <input type="date" [(ngModel)]="date" />
+  </label>
+  <button type="button" (click)="load()">Filtrer</button>
+  <button type="button" class="secondary" (click)="resetFilters()">Réinitialiser</button>
+</div>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="empty">Chargement…</p>
+} @else if (events().length === 0) {
+  <p class="empty">Aucun événement ne correspond à ces critères.</p>
+} @else {
+  <table>
+    <thead>
+      <tr>
+        <th>Titre</th><th>Date</th><th>Lieu</th>
+        <th>Capacité</th><th>Places restantes</th><th>État</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (event of events(); track event.id) {
+        <tr>
+          <td>{{ event.title }}</td>
+          <td>{{ event.starts_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ event.location }}</td>
+          <td>{{ event.capacity }}</td>
+          <td>{{ event.availability?.seats_available ?? '—' }}</td>
+          <td>
+            @if (event.availability?.is_full) {
+              <span class="badge full">Complet</span>
+            } @else {
+              <span class="badge ok">Ouvert</span>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

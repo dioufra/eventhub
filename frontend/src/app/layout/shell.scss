@@ -107,7 +107,16 @@
 .content {
   margin-left: var(--sidebar-width);
   padding: 2.25rem 2.5rem 4rem;
-  max-width: 1240px;
+}
+
+/* Au-delà de cette largeur, on borne la ligne de lecture et on répartit le
+   surplus de part et d'autre. Sans cela, un « max-width » sans centrage
+   laisse tout l'espace excédentaire s'accumuler à droite. Le max() garantit
+   qu'on ne descend jamais sous la marge de base. */
+@media (min-width: 1900px) {
+  .content {
+    padding-inline: max(2.5rem, calc((100% - 1700px) / 2));
+  }
 }
 
 /* ---------- Mobile ---------- */

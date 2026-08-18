@@ -20,14 +20,15 @@
         id="f-location"
         class="input"
         type="text"
-        [(ngModel)]="location"
+        [ngModel]="location()"
+        (ngModelChange)="location.set($event)"
         placeholder="Amphi A"
         (keyup.enter)="load()"
       />
     </div>
     <div class="field">
       <label class="field__label" for="f-date">Date</label>
-      <input id="f-date" class="input" type="date" [(ngModel)]="date" />
+      <input id="f-date" class="input" type="date" [ngModel]="date()" (ngModelChange)="date.set($event)" />
     </div>
     <div class="filters__actions">
       <button type="button" class="btn btn--teal" (click)="load()">Filtrer</button>

@@ -401,6 +401,10 @@ vérifié en créant un événement, en supprimant les conteneurs par
 **Journalisation.** Une politique de rotation limite chaque conteneur à 30 Mo
 de journaux. Sans elle, les fichiers peuvent saturer le disque d'un serveur en
 quelques jours.
+![Les six conteneurs applicatifs, tous rapportés « healthy » par leur sonde de santé.](captures/07-compose-ps.png)
+
+*Les six conteneurs applicatifs, tous rapportés « healthy » par leur sonde de santé.*
+
 
 ---
 
@@ -433,6 +437,10 @@ différentes : *le code est-il correct ?* et *comment le livrer ?*
 **Actions utilisées** : `actions/checkout@v4`, `actions/setup-python@v5`,
 `actions/setup-node@v4`, `docker/setup-buildx-action@v3`,
 `docker/build-push-action@v6`.
+![Pipeline d'intégration continue : la matrice traite les trois services en parallèle.](captures/10-ci.png)
+
+*Pipeline d'intégration continue : la matrice traite les trois services en parallèle.*
+
 
 Deux choix méritent d'être signalés.
 
@@ -480,6 +488,14 @@ serveur réel figure en commentaire à la fin du fichier, prêt à être activé
 qu'une machine sera disponible.
 
 Nous préférons documenter cette limite plutôt que de la masquer.
+![Pipeline de livraison : tests, publication des cinq images, déploiement et recette.](captures/11-cd.png)
+
+*Pipeline de livraison : tests, publication des cinq images, déploiement et recette.*
+
+![Les cinq images publiées sur GitHub Container Registry.](captures/12-packages.png)
+
+*Les cinq images publiées sur GitHub Container Registry.*
+
 
 Le pipeline a été exécuté jusqu'au bout : les cinq images sont publiées, la
 pile de production est démarrée à partir d'elles, les six conteneurs
@@ -491,6 +507,11 @@ de trois minutes.
 **Stratégie de branches** conforme à l'énoncé : `feature/*` pour le
 développement, `develop` pour l'intégration, `main` pour la production. Aucun
 commit n'a été poussé directement sur `main`.
+
+
+![Historique des fusions : chaque Pull Request part d'une branche de travail, passe par « develop », puis rejoint « main ».](captures/13-branches.png)
+
+*Historique des fusions : chaque Pull Request part d'une branche de travail, passe par « develop », puis rejoint « main ».*
 
 **Suivi par issues.** Le backlog a été découpé en 52 issues, chacune reliée à
 une exigence de l'énoncé et suivie dans un tableau GitHub Projects avec des
@@ -575,45 +596,60 @@ d'erreur et de liste vide.
 
 ### 6.4 Captures d'écran
 
-Les fichiers sont dans `docs/captures/`.
-
-**Interface** — parcours complet de l'application
-
-| Capture | Contenu |
-|---|---|
-| `01-evenements.png` | Liste des six événements : dates, lieux, capacités, places restantes, et l'état « Ouvert » ou « Complet » |
-| `02-creation-evenement.png` | Formulaire de création, champs obligatoires signalés |
-| `03-participants.png` | Liste des douze participants, recherche, et les trois types distingués par pastille |
-| `04-ajout-participant.png` | Formulaire participant, choix du type en trois cartes |
-| `05-inscriptions.png` | Inscriptions confirmées : participant, événement, date et lieu — données agrégées depuis **les trois services** |
-| `06-nouvelle-inscription.png` | Parcours guidé : sélection, résumé et confirmation. La Masterclass y apparaît grisée et marquée « Complet » — elle ne peut pas être sélectionnée |
-
-**Exploitation et chaîne DevOps**
-
-| Capture | Contenu |
-|---|---|
-| `07-compose-ps.png` | `docker compose ps` — les six conteneurs `healthy` |
-| `08-swagger.png` | Documentation OpenAPI d'un service, générée automatiquement |
-| `09-smoke.png` | Sortie de `make smoke` — 27 contrôles, 0 échec |
-| `10-ci.png` | Un run d'intégration continue entièrement vert, matrice des services visible |
-| `11-cd.png` | Le pipeline de livraison complet : tests, publication, déploiement et recette |
-| `12-packages.png` | Les cinq images publiées sur GitHub Container Registry |
-| `13-branches.png` | L'historique des fusions : `feature/*` → `develop` → `main`, chaque Pull Request numérotée |
-
-> Le graphe **Insights → Network** de GitHub n'est pas accessible sur les
-> dépôts privés en formule gratuite. Nous lui avons substitué la sortie de
-> `git log --graph`, qui montre la même information — et davantage : les
-> messages de commit et le numéro de chaque Pull Request fusionnée.
-
-La capture `06` mérite une mention : elle montre l'application interrogeant
-simultanément les trois microservices — la liste des événements avec leurs
-places restantes vient du service Événements, la liste des participants du
-service Participants, et la confirmation déclenchera l'orchestration décrite
-au § 2.3.
+#### Gestion des événements
 
 
----
----
+![Liste des événements : dates, lieux, capacités, places restantes et état. La Masterclass, à 0 place sur 4, est signalée « Complet ».](captures/01-evenements.png)
+
+*Liste des événements : dates, lieux, capacités, places restantes et état. La Masterclass, à 0 place sur 4, est signalée « Complet ».*
+
+
+![Formulaire de création, champs obligatoires signalés et validation à la saisie.](captures/02-creation-evenement.png)
+
+*Formulaire de création, champs obligatoires signalés et validation à la saisie.*
+
+#### Gestion des participants
+
+
+![Liste des participants, recherche par nom ou email, et les trois types distingués par pastille.](captures/03-participants.png)
+
+*Liste des participants, recherche par nom ou email, et les trois types distingués par pastille.*
+
+
+![Formulaire participant : le type se choisit parmi trois cartes explicites.](captures/04-ajout-participant.png)
+
+*Formulaire participant : le type se choisit parmi trois cartes explicites.*
+
+#### Inscriptions
+
+
+![Inscriptions confirmées. Chaque ligne agrège des données issues des **trois microservices** : le participant vient du service Participants, le titre et le lieu du service Événements, l'inscription elle-même du service Inscriptions.](captures/05-inscriptions.png)
+
+*Inscriptions confirmées. Chaque ligne agrège des données issues des **trois microservices** : le participant vient du service Participants, le titre et le lieu du service Événements, l'inscription elle-même du service Inscriptions.*
+
+
+![Parcours guidé : sélection de l'événement puis du participant, résumé et confirmation. La Masterclass complète apparaît grisée et ne peut pas être sélectionnée.](captures/06-nouvelle-inscription.png)
+
+*Parcours guidé : sélection de l'événement puis du participant, résumé et confirmation. La Masterclass complète apparaît grisée et ne peut pas être sélectionnée.*
+
+#### Documentation des API
+
+
+![Documentation OpenAPI du service Événements, générée automatiquement par FastAPI. C'est elle qui sert de source aux clients TypeScript du frontend.](captures/08-swagger.png)
+
+*Documentation OpenAPI du service Événements, générée automatiquement par FastAPI. C'est elle qui sert de source aux clients TypeScript du frontend.*
+
+#### Recette
+
+
+![Les 27 contrôles de recette exécutés sur l'application déployée : disponibilité, validation, communication inter-services, règles métier et annulation.](captures/09-smoke.png)
+
+*Les 27 contrôles de recette exécutés sur l'application déployée : disponibilité, validation, communication inter-services, règles métier et annulation.*
+
+> Le graphe **Insights → Network** de GitHub n'étant pas accessible sur les
+> dépôts privés en formule gratuite, la vue des branches ci-dessus (§ 5.3) a été
+> produite avec `git log --graph`, qui montre la même information et davantage :
+> les messages de commit et le numéro de chaque Pull Request fusionnée.
 
 ## 7. Difficultés rencontrées et solutions
 

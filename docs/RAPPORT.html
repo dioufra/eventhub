@@ -30,6 +30,35 @@ hr { border: 0; border-top: 1px solid #cfdad7; margin: 2em 0; }
 sub { color: #667; font-size: 8.5pt; }
 strong { color: #0a2e29; }
 h2, h3 { break-after: avoid; }
+
+/* ---- Captures d'écran intégrées ---- */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.1em auto 0.4em;
+  border: 1px solid #cfdad7;
+  border-radius: 4px;
+  page-break-inside: avoid;
+}
+/* La légende suit immédiatement l'image : on les garde solidaires. */
+img + em, p > em:only-child {
+  display: block;
+  text-align: center;
+  font-size: 8.5pt;
+  color: #55635f;
+  margin: 0 auto 1.6em;
+  max-width: 82%;
+  line-height: 1.45;
+  page-break-before: avoid;
+}
+h4 {
+  font-size: 10.5pt;
+  color: #0a4f47;
+  margin: 1.6em 0 .4em;
+  page-break-after: avoid;
+}
+
 </style></head><body><h1>EventHub — Rapport de projet</h1>
 <p><strong>Examen pratique DevOps</strong> · Master 1 Intelligence Artificielle
 <strong>Dakar Institute of Technology</strong> · Août 2026</p>
@@ -672,7 +701,9 @@ vérifié en créant un événement, en supprimant les conteneurs par
 <code>docker compose down</code>, puis en les relançant : l'événement était toujours là.</p>
 <p><strong>Journalisation.</strong> Une politique de rotation limite chaque conteneur à 30 Mo
 de journaux. Sans elle, les fichiers peuvent saturer le disque d'un serveur en
-quelques jours.</p>
+quelques jours.
+<img alt="Les six conteneurs applicatifs, tous rapportés « healthy » par leur sonde de santé." src="captures/07-compose-ps.png" /></p>
+<p><em>Les six conteneurs applicatifs, tous rapportés « healthy » par leur sonde de santé.</em></p>
 <hr />
 <h2>5. Intégration et déploiement continus</h2>
 <p>Deux pipelines GitHub Actions, séparés parce qu'ils répondent à deux questions
@@ -716,7 +747,9 @@ différentes : <em>le code est-il correct ?</em> et <em>comment le livrer ?</em>
 </table>
 <p><strong>Actions utilisées</strong> : <code>actions/checkout@v4</code>, <code>actions/setup-python@v5</code>,
 <code>actions/setup-node@v4</code>, <code>docker/setup-buildx-action@v3</code>,
-<code>docker/build-push-action@v6</code>.</p>
+<code>docker/build-push-action@v6</code>.
+<img alt="Pipeline d'intégration continue : la matrice traite les trois services en parallèle." src="captures/10-ci.png" /></p>
+<p><em>Pipeline d'intégration continue : la matrice traite les trois services en parallèle.</em></p>
 <p>Deux choix méritent d'être signalés.</p>
 <p><strong>La matrice.</strong> Le job de tests est écrit une fois et s'exécute trois fois en
 parallèle, une par service. C'est le bénéfice direct de la structure interne
@@ -773,7 +806,11 @@ de recette. Ce n'est donc pas une simulation : les images livrées sont
 effectivement déployées et éprouvées. Le script de déploiement par SSH vers un
 serveur réel figure en commentaire à la fin du fichier, prêt à être activé dès
 qu'une machine sera disponible.</p>
-<p>Nous préférons documenter cette limite plutôt que de la masquer.</p>
+<p>Nous préférons documenter cette limite plutôt que de la masquer.
+<img alt="Pipeline de livraison : tests, publication des cinq images, déploiement et recette." src="captures/11-cd.png" /></p>
+<p><em>Pipeline de livraison : tests, publication des cinq images, déploiement et recette.</em></p>
+<p><img alt="Les cinq images publiées sur GitHub Container Registry." src="captures/12-packages.png" /></p>
+<p><em>Les cinq images publiées sur GitHub Container Registry.</em></p>
 <p>Le pipeline a été exécuté jusqu'au bout : les cinq images sont publiées, la
 pile de production est démarrée à partir d'elles, les six conteneurs
 deviennent sains, et les 27 contrôles de recette passent — le tout en moins
@@ -782,6 +819,8 @@ de trois minutes.</p>
 <p><strong>Stratégie de branches</strong> conforme à l'énoncé : <code>feature/*</code> pour le
 développement, <code>develop</code> pour l'intégration, <code>main</code> pour la production. Aucun
 commit n'a été poussé directement sur <code>main</code>.</p>
+<p><img alt="Historique des fusions : chaque Pull Request part d'une branche de travail, passe par « develop », puis rejoint « main »." src="captures/13-branches.png" /></p>
+<p><em>Historique des fusions : chaque Pull Request part d'une branche de travail, passe par « develop », puis rejoint « main ».</em></p>
 <p><strong>Suivi par issues.</strong> Le backlog a été découpé en 52 issues, chacune reliée à
 une exigence de l'énoncé et suivie dans un tableau GitHub Projects avec des
 champs d'estimation, de priorité et de sprint. Chaque branche est créée depuis
@@ -911,93 +950,33 @@ démarrage du conteneur n'aurait aucun effet.</p>
 <p>L'interface reprend l'identité visuelle du DIT et gère les états de chargement,
 d'erreur et de liste vide.</p>
 <h3>6.4 Captures d'écran</h3>
-<p>Les fichiers sont dans <code>docs/captures/</code>.</p>
-<p><strong>Interface</strong> — parcours complet de l'application</p>
-<table>
-<thead>
-<tr>
-<th>Capture</th>
-<th>Contenu</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>01-evenements.png</code></td>
-<td>Liste des six événements : dates, lieux, capacités, places restantes, et l'état « Ouvert » ou « Complet »</td>
-</tr>
-<tr>
-<td><code>02-creation-evenement.png</code></td>
-<td>Formulaire de création, champs obligatoires signalés</td>
-</tr>
-<tr>
-<td><code>03-participants.png</code></td>
-<td>Liste des douze participants, recherche, et les trois types distingués par pastille</td>
-</tr>
-<tr>
-<td><code>04-ajout-participant.png</code></td>
-<td>Formulaire participant, choix du type en trois cartes</td>
-</tr>
-<tr>
-<td><code>05-inscriptions.png</code></td>
-<td>Inscriptions confirmées : participant, événement, date et lieu — données agrégées depuis <strong>les trois services</strong></td>
-</tr>
-<tr>
-<td><code>06-nouvelle-inscription.png</code></td>
-<td>Parcours guidé : sélection, résumé et confirmation. La Masterclass y apparaît grisée et marquée « Complet » — elle ne peut pas être sélectionnée</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Exploitation et chaîne DevOps</strong></p>
-<table>
-<thead>
-<tr>
-<th>Capture</th>
-<th>Contenu</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>07-compose-ps.png</code></td>
-<td><code>docker compose ps</code> — les six conteneurs <code>healthy</code></td>
-</tr>
-<tr>
-<td><code>08-swagger.png</code></td>
-<td>Documentation OpenAPI d'un service, générée automatiquement</td>
-</tr>
-<tr>
-<td><code>09-smoke.png</code></td>
-<td>Sortie de <code>make smoke</code> — 27 contrôles, 0 échec</td>
-</tr>
-<tr>
-<td><code>10-ci.png</code></td>
-<td>Un run d'intégration continue entièrement vert, matrice des services visible</td>
-</tr>
-<tr>
-<td><code>11-cd.png</code></td>
-<td>Le pipeline de livraison complet : tests, publication, déploiement et recette</td>
-</tr>
-<tr>
-<td><code>12-packages.png</code></td>
-<td>Les cinq images publiées sur GitHub Container Registry</td>
-</tr>
-<tr>
-<td><code>13-branches.png</code></td>
-<td>L'historique des fusions : <code>feature/*</code> → <code>develop</code> → <code>main</code>, chaque Pull Request numérotée</td>
-</tr>
-</tbody>
-</table>
+<h4>Gestion des événements</h4>
+<p><img alt="Liste des événements : dates, lieux, capacités, places restantes et état. La Masterclass, à 0 place sur 4, est signalée « Complet »." src="captures/01-evenements.png" /></p>
+<p><em>Liste des événements : dates, lieux, capacités, places restantes et état. La Masterclass, à 0 place sur 4, est signalée « Complet ».</em></p>
+<p><img alt="Formulaire de création, champs obligatoires signalés et validation à la saisie." src="captures/02-creation-evenement.png" /></p>
+<p><em>Formulaire de création, champs obligatoires signalés et validation à la saisie.</em></p>
+<h4>Gestion des participants</h4>
+<p><img alt="Liste des participants, recherche par nom ou email, et les trois types distingués par pastille." src="captures/03-participants.png" /></p>
+<p><em>Liste des participants, recherche par nom ou email, et les trois types distingués par pastille.</em></p>
+<p><img alt="Formulaire participant : le type se choisit parmi trois cartes explicites." src="captures/04-ajout-participant.png" /></p>
+<p><em>Formulaire participant : le type se choisit parmi trois cartes explicites.</em></p>
+<h4>Inscriptions</h4>
+<p><img alt="Inscriptions confirmées. Chaque ligne agrège des données issues des **trois microservices** : le participant vient du service Participants, le titre et le lieu du service Événements, l'inscription elle-même du service Inscriptions." src="captures/05-inscriptions.png" /></p>
+<p><em>Inscriptions confirmées. Chaque ligne agrège des données issues des </em><em>trois microservices</em><em> : le participant vient du service Participants, le titre et le lieu du service Événements, l'inscription elle-même du service Inscriptions.</em></p>
+<p><img alt="Parcours guidé : sélection de l'événement puis du participant, résumé et confirmation. La Masterclass complète apparaît grisée et ne peut pas être sélectionnée." src="captures/06-nouvelle-inscription.png" /></p>
+<p><em>Parcours guidé : sélection de l'événement puis du participant, résumé et confirmation. La Masterclass complète apparaît grisée et ne peut pas être sélectionnée.</em></p>
+<h4>Documentation des API</h4>
+<p><img alt="Documentation OpenAPI du service Événements, générée automatiquement par FastAPI. C'est elle qui sert de source aux clients TypeScript du frontend." src="captures/08-swagger.png" /></p>
+<p><em>Documentation OpenAPI du service Événements, générée automatiquement par FastAPI. C'est elle qui sert de source aux clients TypeScript du frontend.</em></p>
+<h4>Recette</h4>
+<p><img alt="Les 27 contrôles de recette exécutés sur l'application déployée : disponibilité, validation, communication inter-services, règles métier et annulation." src="captures/09-smoke.png" /></p>
+<p><em>Les 27 contrôles de recette exécutés sur l'application déployée : disponibilité, validation, communication inter-services, règles métier et annulation.</em></p>
 <blockquote>
-<p>Le graphe <strong>Insights → Network</strong> de GitHub n'est pas accessible sur les
-dépôts privés en formule gratuite. Nous lui avons substitué la sortie de
-<code>git log --graph</code>, qui montre la même information — et davantage : les
-messages de commit et le numéro de chaque Pull Request fusionnée.</p>
+<p>Le graphe <strong>Insights → Network</strong> de GitHub n'étant pas accessible sur les
+dépôts privés en formule gratuite, la vue des branches ci-dessus (§ 5.3) a été
+produite avec <code>git log --graph</code>, qui montre la même information et davantage :
+les messages de commit et le numéro de chaque Pull Request fusionnée.</p>
 </blockquote>
-<p>La capture <code>06</code> mérite une mention : elle montre l'application interrogeant
-simultanément les trois microservices — la liste des événements avec leurs
-places restantes vient du service Événements, la liste des participants du
-service Participants, et la confirmation déclenchera l'orchestration décrite
-au § 2.3.</p>
-<h2>---</h2>
 <h2>7. Difficultés rencontrées et solutions</h2>
 <h3>7.1 Une redirection invisible qui cassait toutes les créations</h3>
 <p><strong>Symptôme.</strong> Les lectures fonctionnaient à travers la gateway, mais les

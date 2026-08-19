@@ -13,7 +13,7 @@ PORT          := $(or $(PORT),8080)
 
 .DEFAULT_GOAL := help
 .PHONY: help init up down stop restart build rebuild logs ps sh test test-front \
-        smoke db backup clean reset prod prod-down urls
+        smoke seed db backup clean reset prod prod-down urls
 
 help:  ## Affiche cette aide
 	@echo ""
@@ -82,6 +82,9 @@ test-front:  ## Tests unitaires du frontend Angular
 
 smoke:  ## Tests de recette sur la pile démarrée
 	@bash scripts/smoke-test.sh http://localhost:$(PORT)
+
+seed:  ## Remplit la base avec le jeu de démonstration (⚠️ écrase les données)
+	@bash scripts/seed-demo.sh http://localhost:$(PORT)
 
 # ---- Base de données ---------------------------------------------------------
 

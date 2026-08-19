@@ -974,10 +974,16 @@ d'erreur et de liste vide.</p>
 </tr>
 <tr>
 <td><code>13-branches.png</code></td>
-<td>Le graphe des branches — Insights → Network</td>
+<td>L'historique des fusions : <code>feature/*</code> → <code>develop</code> → <code>main</code>, chaque Pull Request numérotée</td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>Le graphe <strong>Insights → Network</strong> de GitHub n'est pas accessible sur les
+dépôts privés en formule gratuite. Nous lui avons substitué la sortie de
+<code>git log --graph</code>, qui montre la même information — et davantage : les
+messages de commit et le numéro de chaque Pull Request fusionnée.</p>
+</blockquote>
 <p>La capture <code>06</code> mérite une mention : elle montre l'application interrogeant
 simultanément les trois microservices — la liste des événements avec leurs
 places restantes vient du service Événements, la liste des participants du

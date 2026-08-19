@@ -592,7 +592,12 @@ Les fichiers sont dans `docs/captures/`.
 | `10-ci.png` | Un run d'intégration continue entièrement vert, matrice des services visible |
 | `11-cd.png` | Le pipeline de livraison complet : tests, publication, déploiement et recette |
 | `12-packages.png` | Les cinq images publiées sur GitHub Container Registry |
-| `13-branches.png` | Le graphe des branches — Insights → Network |
+| `13-branches.png` | L'historique des fusions : `feature/*` → `develop` → `main`, chaque Pull Request numérotée |
+
+> Le graphe **Insights → Network** de GitHub n'est pas accessible sur les
+> dépôts privés en formule gratuite. Nous lui avons substitué la sortie de
+> `git log --graph`, qui montre la même information — et davantage : les
+> messages de commit et le numéro de chaque Pull Request fusionnée.
 
 La capture `06` mérite une mention : elle montre l'application interrogeant
 simultanément les trois microservices — la liste des événements avec leurs

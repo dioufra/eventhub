@@ -123,6 +123,66 @@ docker compose down          # conserve les données
 docker compose down -v       # supprime aussi la base de données
 ```
 
+### Avec Docker, service par service
+
+Sans Docker Compose, chaque image se construit et se lance à la main. Les
+conteneurs doivent porter **exactement ces noms** : ce sont eux que le DNS
+interne de Docker résout, et que la passerelle utilise pour router les appels.
+
+```bash
+# 1. Un réseau commun à tous les conteneurs
+docker network create eventhub-net
+
+# 2. La base de données, avec le script qui crée les trois bases
+docker run -d --name postgres --network eventhub-net \
+  -e POSTGRES_USER=eventhub \
+  -e POSTGRES_PASSWORD=motdepasse \
+  -e POSTGRES_DB=postgres \
+  -v eventhub-pgdata:/var/lib/postgresql/data \
+  -v "$PWD/infra/postgres/init:/docker-entrypoint-initdb.d:ro" \
+  postgres:16-alpine
+
+# 3. Construction des cinq images
+docker build -t eventhub-events        ./events-service
+docker build -t eventhub-participants  ./participants-service
+docker build -t eventhub-registrations ./registrations-service
+docker build -t eventhub-frontend      ./frontend
+docker build -t eventhub-gateway       ./gateway
+
+# 4. Les trois microservices
+docker run -d --name events-service --network eventhub-net \
+  -e DATABASE_URL="postgresql+pg8000://eventhub:motdepasse@postgres:5432/eventhub_events" \
+  eventhub-events
+
+docker run -d --name participants-service --network eventhub-net \
+  -e DATABASE_URL="postgresql+pg8000://eventhub:motdepasse@postgres:5432/eventhub_participants" \
+  eventhub-participants
+
+docker run -d --name registrations-service --network eventhub-net \
+  -e DATABASE_URL="postgresql+pg8000://eventhub:motdepasse@postgres:5432/eventhub_registrations" \
+  -e EVENTS_SERVICE_URL="http://events-service:8001" \
+  -e PARTICIPANTS_SERVICE_URL="http://participants-service:8002" \
+  eventhub-registrations
+
+# 5. Le frontend, puis la passerelle qui expose l'ensemble
+docker run -d --name frontend --network eventhub-net eventhub-frontend
+docker run -d --name gateway  --network eventhub-net -p 8080:80 eventhub-gateway
+```
+
+L'application est disponible sur **http://localhost:8080**
+
+> La passerelle résout le nom de ses cibles à son démarrage : lancez-la
+> **après** le frontend et les trois microservices, sinon elle s'arrête sur
+> `host not found in upstream`.
+
+Pour tout arrêter et nettoyer :
+
+```bash
+docker rm -f gateway frontend registrations-service participants-service events-service postgres
+docker network rm eventhub-net
+docker volume rm eventhub-pgdata      # supprime aussi les données
+```
+
 ### Avec le Makefile
 
 ```bash
@@ -181,14 +241,41 @@ make smoke    # tests de recette sur l'application démarrée
 
 ## Intégration et déploiement continus
 
-Deux pipelines GitHub Actions :
+Deux pipelines GitHub Actions, définis dans `.github/workflows/`.
 
-| Pipeline | Déclencheur | Rôle |
-|---|---|---|
-| **CI** | toute branche et Pull Request | Tests unitaires, build du frontend, construction des images |
-| **CD** | `main` | Publication des images sur GitHub Container Registry, déploiement et tests de recette |
+### `ci.yml` — à chaque push et Pull Request
 
-Stratégie de branches : `feature/*` → `develop` → `main`.
+| Étape | Ce qu'elle fait |
+|---|---|
+| Configuration | Valide `docker-compose.yml`, vérifie qu'un seul port est publié en production et que le script d'initialisation crée bien trois bases |
+| Tests backend | `pytest` sur les trois microservices, exécutés **en parallèle** |
+| Frontend | Installation, compilation de production, vérification du chemin de sortie du build |
+| Images | Construction des cinq images Docker, sans publication |
+
+Chaque étape vérifie d'abord si son périmètre est implémenté : un dossier
+encore vide est signalé et ignoré plutôt que de faire échouer le pipeline.
+
+### `cd.yml` — à chaque fusion sur `main`
+
+| Étape | Ce qu'elle fait |
+|---|---|
+| Tests | Rejeu des tests unitaires — on ne publie jamais sans revalider |
+| Publication | Les cinq images sont poussées sur **GitHub Container Registry**, étiquetées `latest` et `sha-<commit>` |
+| Déploiement | La pile est démarrée à partir des images publiées |
+| Recette | 27 contrôles de bout en bout sur l'application déployée |
+
+L'étiquette `sha-<commit>` permet de savoir exactement quel code correspond à
+une image donnée.
+
+### Stratégie de branches
+
+```
+feature/*  ──▶  develop  ──▶  main
+(développement)  (intégration)  (production)
+```
+
+Aucun commit n'est poussé directement sur `main` : tout passe par une Pull
+Request relue.
 
 ---
 

@@ -138,9 +138,34 @@ jobs:
             echo "POSTGRES_USER=eventhub"
             echo "POSTGRES_PASSWORD=$(openssl rand -base64 24)"
             echo "GATEWAY_PORT=8080"
-            echo "REGISTRY=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}"
+            # ATTENTION : la valeur doit s'arrêter au PROPRIÉTAIRE.
+            # Les images sont publiées sous « <owner>/eventhub-<service> » —
+            # le préfixe « eventhub » est collé au nom du service par un
+            # tiret, il n'est PAS un segment de chemin. Écrire ici
+            # « ghcr.io/<owner>/eventhub » produirait
+            # « ghcr.io/<owner>/eventhub/eventhub-frontend », que le
+            # registre rejette avec « name invalid ».
+            echo "REGISTRY=${{ env.REGISTRY }}/${{ github.repository_owner }}"
             echo "TAG=latest"
           } >> .env
+
+      - name: Les images attendues portent-elles le bon nom ?
+        run: |
+          set -e
+          attendues=$(docker compose -f docker-compose.yml -f docker-compose.prod.yml config \
+                        | grep -oP 'image: \Kghcr[^\s]+' | sort -u)
+          echo "$attendues"
+          for img in $attendues; do
+            # Le nom doit être « ghcr.io/<owner>/eventhub-<service>:<tag> » :
+            # exactement deux segments après le domaine.
+            n=$(echo "${img%%:*}" | awk -F/ '{print NF}')
+            if [ "$n" -ne 3 ]; then
+              echo "::error::Nom d'image invalide : $img"
+              echo "::error::Attendu ghcr.io/<owner>/eventhub-<service> — vérifier REGISTRY"
+              exit 1
+            fi
+          done
+          echo "✅ noms d'images conformes"
 
       - name: Déploiement depuis les images publiées
         run: |

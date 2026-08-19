@@ -43,16 +43,20 @@ export class RegistrationNew {
 
   readonly typeLabel = typeLabel;
 
-  selectedEventId: number | null = null;
-  selectedParticipantId: number | null = null;
-  participantFilter = '';
+  // Ces trois valeurs sont lues à l'intérieur de computed() ci-dessous.
+  // Elles DOIVENT être des signaux : un computed ne se recalcule que si un
+  // signal qu'il lit change. Avec de simples propriétés, selectedEvent()
+  // restait figé à null et le résumé n'apparaissait jamais.
+  readonly selectedEventId = signal<number | null>(null);
+  readonly selectedParticipantId = signal<number | null>(null);
+  readonly participantFilter = signal('');
 
   readonly selectedEvent = computed(
-    () => this.events().find((e) => e.id === this.selectedEventId) ?? null,
+    () => this.events().find((e) => e.id === this.selectedEventId()) ?? null,
   );
 
   readonly selectedParticipant = computed(
-    () => this.participants().find((p) => p.id === this.selectedParticipantId) ?? null,
+    () => this.participants().find((p) => p.id === this.selectedParticipantId()) ?? null,
   );
 
   readonly isFull = computed(() => this.selectedEvent()?.availability?.is_full === true);
@@ -65,7 +69,7 @@ export class RegistrationNew {
   readonly canConfirm = computed(() => this.canReview() && !this.isFull() && !this.submitting());
 
   readonly filteredParticipants = computed(() => {
-    const needle = this.participantFilter.trim().toLowerCase();
+    const needle = this.participantFilter().trim().toLowerCase();
     if (!needle) return this.participants();
     return this.participants().filter(
       (p) => p.full_name.toLowerCase().includes(needle) || p.email.toLowerCase().includes(needle),

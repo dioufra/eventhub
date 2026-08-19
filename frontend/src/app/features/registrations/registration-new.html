@@ -51,10 +51,15 @@
             @for (event of events(); track event.id) {
               <label
                 class="choice"
-                [class.choice--on]="selectedEventId === event.id"
+                [class.choice--on]="selectedEventId() === event.id"
                 [class.choice--off]="event.availability?.is_full"
               >
-                <input type="radio" name="event" [value]="event.id" [(ngModel)]="selectedEventId" />
+                <input
+                  type="radio"
+                  name="event"
+                  [checked]="selectedEventId() === event.id"
+                  (change)="selectedEventId.set(event.id)"
+                />
                 <span class="choice__main">
                   <span class="choice__title">{{ event.title }}</span>
                   <span class="choice__meta">
@@ -75,7 +80,7 @@
       </section>
 
       <!-- Étape 2 — participant -->
-      <section class="card step" [class.step--muted]="!selectedEventId">
+      <section class="card step" [class.step--muted]="!selectedEventId()">
         <div class="card__header">
           <h3><span class="step__num">2</span> Sélectionner un participant</h3>
         </div>
@@ -86,7 +91,8 @@
               id="pfilter"
               class="input"
               type="search"
-              [(ngModel)]="participantFilter"
+              [ngModel]="participantFilter()"
+              (ngModelChange)="participantFilter.set($event)"
               placeholder="Nom ou email"
             />
           </div>
@@ -96,12 +102,12 @@
           } @else {
             <div class="choices choices--scroll">
               @for (p of filteredParticipants(); track p.id) {
-                <label class="choice" [class.choice--on]="selectedParticipantId === p.id">
+                <label class="choice" [class.choice--on]="selectedParticipantId() === p.id">
                   <input
                     type="radio"
                     name="participant"
-                    [value]="p.id"
-                    [(ngModel)]="selectedParticipantId"
+                    [checked]="selectedParticipantId() === p.id"
+                    (change)="selectedParticipantId.set(p.id)"
                   />
                   <span class="choice__main">
                     <span class="choice__title">{{ p.full_name }}</span>

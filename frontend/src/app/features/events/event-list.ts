@@ -35,10 +35,11 @@ export class EventList {
   readonly pendingDelete = signal<EventRow | null>(null);
   readonly deleting = signal(false);
 
-  location = '';
-  date = '';
+  // Lues dans le computed hasFilters : doivent être des signaux.
+  readonly location = signal('');
+  readonly date = signal('');
 
-  readonly hasFilters = computed(() => !!this.location || !!this.date);
+  readonly hasFilters = computed(() => !!this.location() || !!this.date());
 
   constructor() {
     this.load();
@@ -49,7 +50,7 @@ export class EventList {
     this.error.set(null);
 
     this.api
-      .listEvents(this.date || undefined, this.location || undefined)
+      .listEvents(this.date() || undefined, this.location() || undefined)
       .pipe(
         switchMap((events) =>
           events.length
@@ -76,8 +77,8 @@ export class EventList {
   }
 
   resetFilters(): void {
-    this.location = '';
-    this.date = '';
+    this.location.set('');
+    this.date.set('');
     this.load();
   }
 

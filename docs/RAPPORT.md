@@ -605,20 +605,8 @@ places restantes vient du service Événements, la liste des participants du
 service Participants, et la confirmation déclenchera l'orchestration décrite
 au § 2.3.
 
----|---|
-| `01-evenements.png` | Liste des événements avec les places restantes |
-| `02-creation-evenement.png` | Formulaire de création |
-| `03-participants.png` | Liste et recherche |
-| `04-inscription.png` | Parcours d'inscription avec le résumé |
-| `05-evenement-complet.png` | Un événement complet, confirmation désactivée |
-| `06-compose-ps.png` | `docker compose ps` — les 6 conteneurs sains |
-| `07-swagger.png` | Documentation interactive d'un service |
-| `08-ci.png` | Un run CI entièrement vert |
-| `09-cd.png` | Un run CD jusqu'au déploiement |
-| `10-packages.png` | Les 5 images publiées sur GHCR |
-| `11-smoke.png` | Sortie de `make smoke` — 27 contrôles réussis |
-| `12-branches.png` | Le graphe des branches (Insights → Network) |
 
+---
 ---
 
 ## 7. Difficultés rencontrées et solutions

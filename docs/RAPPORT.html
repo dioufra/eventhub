@@ -112,7 +112,7 @@ déploiement continus, et gestion de projet avec Git et GitHub.</p>
 </tr>
 <tr>
 <td>Tests unitaires</td>
-<td>48</td>
+<td>62 — 48 backend, 14 frontend</td>
 </tr>
 <tr>
 <td>Contrôles de recette</td>
@@ -121,6 +121,10 @@ déploiement continus, et gestion de projet avec Git et GitHub.</p>
 <tr>
 <td>Pipelines GitHub Actions</td>
 <td>2</td>
+</tr>
+<tr>
+<td>Images publiées sur le registre</td>
+<td>5</td>
 </tr>
 </tbody>
 </table>
@@ -770,6 +774,10 @@ effectivement déployées et éprouvées. Le script de déploiement par SSH vers
 serveur réel figure en commentaire à la fin du fichier, prêt à être activé dès
 qu'une machine sera disponible.</p>
 <p>Nous préférons documenter cette limite plutôt que de la masquer.</p>
+<p>Le pipeline a été exécuté jusqu'au bout : les cinq images sont publiées, la
+pile de production est démarrée à partir d'elles, les six conteneurs
+deviennent sains, et les 27 contrôles de recette passent — le tout en moins
+de trois minutes.</p>
 <h3>5.3 Gestion du projet</h3>
 <p><strong>Stratégie de branches</strong> conforme à l'énoncé : <code>feature/*</code> pour le
 développement, <code>develop</code> pour l'intégration, <code>main</code> pour la production. Aucun
@@ -1050,7 +1058,62 @@ lui, ne prouvait rien.</p>
 <p><strong>Résolution.</strong> Reformulation du scénario : un événement à deux places, deux
 inscrits, puis une tentative de réduction à une place. La règle est désormais
 réellement éprouvée, et le cas passant a été ajouté.</p>
-<h3>7.6 Concilier les emplois du temps de l'équipe</h3>
+<h3>7.6 Neuf places perdues sur des inscriptions simultanées</h3>
+<p><strong>Symptôme.</strong> Aucun, à l'usage. L'interface refusait correctement d'inscrire
+deux fois le même participant, et les tests unitaires passaient.</p>
+<p><strong>Ce qui l'a révélé.</strong> Un test délibéré : dix requêtes d'inscription lancées
+<strong>en parallèle</strong> sur le même couple événement–participant.</p>
+<pre><code>dix réponses          201
+lignes en base        1        ← pas de doublon
+places consommées     10 / 50  ← neuf places perdues
+</code></pre>
+<p><strong>Cause.</strong> Chaque requête réservait sa place <em>avant</em> de découvrir que
+l'inscription existait déjà, puis re-confirmait la ligne en silence — sans
+jamais rendre la place. Le contrôle « déjà inscrit ? » et l'écriture n'étant
+pas atomiques, dix requêtes passaient toutes le contrôle avant qu'aucune
+n'ait écrit.</p>
+<p><strong>Résolution.</strong> Deux mécanismes complémentaires. Si la ligne trouvée est déjà
+confirmée, la place est rendue et un 409 renvoyé. Et pour deux insertions
+réellement simultanées, une contrainte <code>UNIQUE (event_id, participant_id)</code>
+laisse la base trancher : le perdant libère sa place et reçoit lui aussi
+un 409.</p>
+<pre><code>après correctif       1 × 201, 9 × 409
+places consommées     1 / 50
+</code></pre>
+<p><strong>Ce que nous en retenons.</strong> Un comportement correct à l'usage peut masquer
+un défaut de concurrence. Ni l'interface, ni les tests séquentiels ne
+l'auraient montré.</p>
+<h3>7.7 Deux échecs de mise en production</h3>
+<p>Le pipeline de livraison a échoué deux fois avant de passer, sur deux causes
+distinctes — et la seconde a été trouvée grâce à la correction de la première.</p>
+<p><strong>Premier échec : un segment de chemin en trop.</strong> Les cinq images étaient
+publiées avec succès, puis le déploiement s'arrêtait sur
+<code>Error response from daemon: name invalid</code>. Les images étaient publiées sous
+<code>&lt;owner&gt;/eventhub-frontend</code> — le préfixe collé au service par un <strong>tiret</strong> —
+mais recherchées sous <code>&lt;owner&gt;/eventhub/eventhub-frontend</code>, avec une barre
+oblique. Le registre rejetait ce nom.</p>
+<p>En corrigeant, nous avons ajouté un <strong>garde-fou</strong> qui vérifie la forme des
+noms d'images <em>avant</em> de tenter le téléchargement, plutôt que de laisser
+l'erreur surgir après plusieurs minutes de publication.</p>
+<p><strong>Second échec : une collision de variables.</strong> Le garde-fou a immédiatement
+signalé un nouveau nom incorrect — l'identifiant du propriétaire avait
+disparu. Le workflow définissait <code>env: REGISTRY: ghcr.io</code> au niveau global,
+que GitHub Actions exporte comme variable d'environnement. Or <strong>Docker Compose
+donne la priorité aux variables du shell sur le fichier <code>.env</code></strong> : la valeur
+que nous écrivions dans <code>.env</code> était écrasée sans le moindre avertissement.</p>
+<p>Reproduit isolément pour confirmation :</p>
+<pre><code>.env contient   : REGISTRY=depuis-le-fichier-env
+sans variable   → depuis-le-fichier-env/demo:latest
+avec REGISTRY=X → X/demo:latest
+</code></pre>
+<p><strong>Résolution.</strong> La variable du workflow a été renommée <code>GHCR_HOST</code>, supprimant
+la collision, et le job de déploiement fixe désormais <code>REGISTRY</code> dans son
+propre bloc <code>env</code>, où la précédence joue en notre faveur et devient explicite.</p>
+<p><strong>Ce que nous en retenons.</strong> Le garde-fou ajouté après le premier échec a payé
+dès son premier usage : il a transformé une erreur qui coûtait plusieurs
+minutes de publication en un message clair obtenu en quelques secondes. Une
+vérification placée tôt vaut mieux qu'un diagnostic tardif.</p>
+<h3>7.8 Concilier les emplois du temps de l'équipe</h3>
 <p>La difficulté la plus structurante n'était pas technique. Entre les cours, les
 stages et les projets d'autres modules, les créneaux de travail des cinq membres
 se recoupaient rarement. Une organisation classique — tout le monde avance en
@@ -1143,13 +1206,17 @@ problématique CORS et centralisé la sécurité. La <strong>structure interne i
 imposée aux trois services</strong> a permis d'écrire un pipeline unique par matrice et
 de dupliquer un service en une fraction du temps nécessaire à sa création — ce
 qui s'est avéré décisif compte tenu des emplois du temps décalés de l'équipe.</p>
-<p>Le projet nous laisse surtout une leçon de méthode : les bugs les plus coûteux
-n'ont pas été détectés par les tests unitaires. La redirection <code>301</code> de la
-gateway, le désaccord de préfixe d'URL, les tests non hermétiques — tous
-passaient les contrôles automatisés et n'ont été révélés que par une exécution
-réelle en conteneurs. C'est ce qui nous a conduits à écrire une recette de 27
-contrôles qui exerce l'application déployée, et à l'intégrer au pipeline de
-livraison.</p>
+<p>Le projet nous laisse surtout une leçon de méthode : <strong>les défauts les plus
+coûteux n'ont pas été détectés par les tests unitaires</strong>. La redirection <code>301</code>
+de la gateway, le désaccord de préfixe d'URL, les tests non hermétiques, les
+places perdues en concurrence, les deux échecs de mise en production — tous
+passaient les contrôles automatisés, et n'ont été révélés que par une exécution
+réelle : en conteneurs, en parallèle, ou en conditions de livraison.</p>
+<p>C'est ce qui nous a conduits à écrire une recette de 27 contrôles qui exerce
+l'application réellement déployée, à l'intégrer au pipeline de livraison, et à
+placer les vérifications le plus tôt possible dans la chaîne — un garde-fou qui
+échoue en quelques secondes vaut mieux qu'un diagnostic après plusieurs minutes
+de publication.</p>
 <hr />
 <p><sub>Rapport rédigé en août 2026 — Examen pratique DevOps, Master 1 Intelligence
 Artificielle, Dakar Institute of Technology.</sub></p></body></html>

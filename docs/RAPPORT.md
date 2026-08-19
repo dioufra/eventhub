@@ -48,9 +48,10 @@ déploiement continus, et gestion de projet avec Git et GitHub.
 | Microservices backend | 3 |
 | Conteneurs applicatifs | 6 |
 | Endpoints REST | 25 |
-| Tests unitaires | 48 |
+| Tests unitaires | 62 — 48 backend, 14 frontend |
 | Contrôles de recette | 27 |
 | Pipelines GitHub Actions | 2 |
+| Images publiées sur le registre | 5 |
 
 ---
 
@@ -480,6 +481,11 @@ qu'une machine sera disponible.
 
 Nous préférons documenter cette limite plutôt que de la masquer.
 
+Le pipeline a été exécuté jusqu'au bout : les cinq images sont publiées, la
+pile de production est démarrée à partir d'elles, les six conteneurs
+deviennent sains, et les 27 contrôles de recette passent — le tout en moins
+de trois minutes.
+
 ### 5.3 Gestion du projet
 
 **Stratégie de branches** conforme à l'énoncé : `feature/*` pour le
@@ -696,7 +702,82 @@ lui, ne prouvait rien.
 inscrits, puis une tentative de réduction à une place. La règle est désormais
 réellement éprouvée, et le cas passant a été ajouté.
 
-### 7.6 Concilier les emplois du temps de l'équipe
+### 7.6 Neuf places perdues sur des inscriptions simultanées
+
+**Symptôme.** Aucun, à l'usage. L'interface refusait correctement d'inscrire
+deux fois le même participant, et les tests unitaires passaient.
+
+**Ce qui l'a révélé.** Un test délibéré : dix requêtes d'inscription lancées
+**en parallèle** sur le même couple événement–participant.
+
+```
+dix réponses          201
+lignes en base        1        ← pas de doublon
+places consommées     10 / 50  ← neuf places perdues
+```
+
+**Cause.** Chaque requête réservait sa place *avant* de découvrir que
+l'inscription existait déjà, puis re-confirmait la ligne en silence — sans
+jamais rendre la place. Le contrôle « déjà inscrit ? » et l'écriture n'étant
+pas atomiques, dix requêtes passaient toutes le contrôle avant qu'aucune
+n'ait écrit.
+
+**Résolution.** Deux mécanismes complémentaires. Si la ligne trouvée est déjà
+confirmée, la place est rendue et un 409 renvoyé. Et pour deux insertions
+réellement simultanées, une contrainte `UNIQUE (event_id, participant_id)`
+laisse la base trancher : le perdant libère sa place et reçoit lui aussi
+un 409.
+
+```
+après correctif       1 × 201, 9 × 409
+places consommées     1 / 50
+```
+
+**Ce que nous en retenons.** Un comportement correct à l'usage peut masquer
+un défaut de concurrence. Ni l'interface, ni les tests séquentiels ne
+l'auraient montré.
+
+### 7.7 Deux échecs de mise en production
+
+Le pipeline de livraison a échoué deux fois avant de passer, sur deux causes
+distinctes — et la seconde a été trouvée grâce à la correction de la première.
+
+**Premier échec : un segment de chemin en trop.** Les cinq images étaient
+publiées avec succès, puis le déploiement s'arrêtait sur
+`Error response from daemon: name invalid`. Les images étaient publiées sous
+`<owner>/eventhub-frontend` — le préfixe collé au service par un **tiret** —
+mais recherchées sous `<owner>/eventhub/eventhub-frontend`, avec une barre
+oblique. Le registre rejetait ce nom.
+
+En corrigeant, nous avons ajouté un **garde-fou** qui vérifie la forme des
+noms d'images *avant* de tenter le téléchargement, plutôt que de laisser
+l'erreur surgir après plusieurs minutes de publication.
+
+**Second échec : une collision de variables.** Le garde-fou a immédiatement
+signalé un nouveau nom incorrect — l'identifiant du propriétaire avait
+disparu. Le workflow définissait `env: REGISTRY: ghcr.io` au niveau global,
+que GitHub Actions exporte comme variable d'environnement. Or **Docker Compose
+donne la priorité aux variables du shell sur le fichier `.env`** : la valeur
+que nous écrivions dans `.env` était écrasée sans le moindre avertissement.
+
+Reproduit isolément pour confirmation :
+
+```
+.env contient   : REGISTRY=depuis-le-fichier-env
+sans variable   → depuis-le-fichier-env/demo:latest
+avec REGISTRY=X → X/demo:latest
+```
+
+**Résolution.** La variable du workflow a été renommée `GHCR_HOST`, supprimant
+la collision, et le job de déploiement fixe désormais `REGISTRY` dans son
+propre bloc `env`, où la précédence joue en notre faveur et devient explicite.
+
+**Ce que nous en retenons.** Le garde-fou ajouté après le premier échec a payé
+dès son premier usage : il a transformé une erreur qui coûtait plusieurs
+minutes de publication en un message clair obtenu en quelques secondes. Une
+vérification placée tôt vaut mieux qu'un diagnostic tardif.
+
+### 7.8 Concilier les emplois du temps de l'équipe
 
 La difficulté la plus structurante n'était pas technique. Entre les cours, les
 stages et les projets d'autres modules, les créneaux de travail des cinq membres
@@ -822,13 +903,18 @@ imposée aux trois services** a permis d'écrire un pipeline unique par matrice 
 de dupliquer un service en une fraction du temps nécessaire à sa création — ce
 qui s'est avéré décisif compte tenu des emplois du temps décalés de l'équipe.
 
-Le projet nous laisse surtout une leçon de méthode : les bugs les plus coûteux
-n'ont pas été détectés par les tests unitaires. La redirection `301` de la
-gateway, le désaccord de préfixe d'URL, les tests non hermétiques — tous
-passaient les contrôles automatisés et n'ont été révélés que par une exécution
-réelle en conteneurs. C'est ce qui nous a conduits à écrire une recette de 27
-contrôles qui exerce l'application déployée, et à l'intégrer au pipeline de
-livraison.
+Le projet nous laisse surtout une leçon de méthode : **les défauts les plus
+coûteux n'ont pas été détectés par les tests unitaires**. La redirection `301`
+de la gateway, le désaccord de préfixe d'URL, les tests non hermétiques, les
+places perdues en concurrence, les deux échecs de mise en production — tous
+passaient les contrôles automatisés, et n'ont été révélés que par une exécution
+réelle : en conteneurs, en parallèle, ou en conditions de livraison.
+
+C'est ce qui nous a conduits à écrire une recette de 27 contrôles qui exerce
+l'application réellement déployée, à l'intégrer au pipeline de livraison, et à
+placer les vérifications le plus tôt possible dans la chaîne — un garde-fou qui
+échoue en quelques secondes vaut mieux qu'un diagnostic après plusieurs minutes
+de publication.
 
 ---
 

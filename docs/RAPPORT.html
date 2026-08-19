@@ -30,8 +30,7 @@ hr { border: 0; border-top: 1px solid #cfdad7; margin: 2em 0; }
 sub { color: #667; font-size: 8.5pt; }
 strong { color: #0a2e29; }
 h2, h3 { break-after: avoid; }
-</style></head><body>
-<h1>EventHub — Rapport de projet</h1>
+</style></head><body><h1>EventHub — Rapport de projet</h1>
 <p><strong>Examen pratique DevOps</strong> · Master 1 Intelligence Artificielle
 <strong>Dakar Institute of Technology</strong> · Août 2026</p>
 <p><strong>Équipe 6</strong></p>
@@ -219,6 +218,13 @@ la même valeur et l'écriraient toutes deux : on obtiendrait 51 inscrits pour
 50 places.</p>
 <hr />
 <h2>3. Description des microservices</h2>
+<blockquote>
+<p><strong>Modèle de données détaillé</strong> : le document <a href="MODELE-DONNEES.md">MODELE-DONNEES.md</a>
+présente les deux vues complémentaires — le modèle conceptuel (domaine
+métier) et le modèle physique (répartition réelle en trois bases). La
+distinction est importante : le MCD laisserait croire à des clés étrangères
+entre les trois tables, alors qu'il n'en existe aucune.</p>
+</blockquote>
 <p>Les trois services partagent la même organisation interne, ce qui permet de les
 relire sans effort et d'écrire un pipeline unique qui les traite tous par
 matrice.</p>

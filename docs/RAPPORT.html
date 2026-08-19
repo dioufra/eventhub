@@ -218,6 +218,13 @@ la même valeur et l'écriraient toutes deux : on obtiendrait 51 inscrits pour
 50 places.</p>
 <hr />
 <h2>3. Description des microservices</h2>
+<blockquote>
+<p><strong>Modèle de données détaillé</strong> : le document <a href="MODELE-DONNEES.md">MODELE-DONNEES.md</a>
+présente les deux vues complémentaires — le modèle conceptuel (domaine
+métier) et le modèle physique (répartition réelle en trois bases). La
+distinction est importante : le MCD laisserait croire à des clés étrangères
+entre les trois tables, alors qu'il n'en existe aucune.</p>
+</blockquote>
 <p>Les trois services partagent la même organisation interne, ce qui permet de les
 relire sans effort et d'écrire un pipeline unique qui les traite tous par
 matrice.</p>

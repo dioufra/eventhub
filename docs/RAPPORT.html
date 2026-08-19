@@ -903,68 +903,93 @@ démarrage du conteneur n'aurait aucun effet.</p>
 <p>L'interface reprend l'identité visuelle du DIT et gère les états de chargement,
 d'erreur et de liste vide.</p>
 <h3>6.4 Captures d'écran</h3>
-<blockquote>
-<p><strong>À insérer avant le rendu.</strong> Placer les fichiers dans <code>docs/captures/</code>.</p>
-</blockquote>
+<p>Les fichiers sont dans <code>docs/captures/</code>.</p>
+<p><strong>Interface</strong> — parcours complet de l'application</p>
 <table>
 <thead>
 <tr>
 <th>Capture</th>
-<th>Contenu attendu</th>
+<th>Contenu</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>01-evenements.png</code></td>
-<td>Liste des événements avec les places restantes</td>
+<td>Liste des six événements : dates, lieux, capacités, places restantes, et l'état « Ouvert » ou « Complet »</td>
 </tr>
 <tr>
 <td><code>02-creation-evenement.png</code></td>
-<td>Formulaire de création</td>
+<td>Formulaire de création, champs obligatoires signalés</td>
 </tr>
 <tr>
 <td><code>03-participants.png</code></td>
-<td>Liste et recherche</td>
+<td>Liste des douze participants, recherche, et les trois types distingués par pastille</td>
 </tr>
 <tr>
-<td><code>04-inscription.png</code></td>
-<td>Parcours d'inscription avec le résumé</td>
+<td><code>04-ajout-participant.png</code></td>
+<td>Formulaire participant, choix du type en trois cartes</td>
 </tr>
 <tr>
-<td><code>05-evenement-complet.png</code></td>
-<td>Un événement complet, confirmation désactivée</td>
+<td><code>05-inscriptions.png</code></td>
+<td>Inscriptions confirmées : participant, événement, date et lieu — données agrégées depuis <strong>les trois services</strong></td>
 </tr>
 <tr>
-<td><code>06-compose-ps.png</code></td>
-<td><code>docker compose ps</code> — les 6 conteneurs sains</td>
-</tr>
-<tr>
-<td><code>07-swagger.png</code></td>
-<td>Documentation interactive d'un service</td>
-</tr>
-<tr>
-<td><code>08-ci.png</code></td>
-<td>Un run CI entièrement vert</td>
-</tr>
-<tr>
-<td><code>09-cd.png</code></td>
-<td>Un run CD jusqu'au déploiement</td>
-</tr>
-<tr>
-<td><code>10-packages.png</code></td>
-<td>Les 5 images publiées sur GHCR</td>
-</tr>
-<tr>
-<td><code>11-smoke.png</code></td>
-<td>Sortie de <code>make smoke</code> — 27 contrôles réussis</td>
-</tr>
-<tr>
-<td><code>12-branches.png</code></td>
-<td>Le graphe des branches (Insights → Network)</td>
+<td><code>06-nouvelle-inscription.png</code></td>
+<td>Parcours guidé : sélection, résumé et confirmation. La Masterclass y apparaît grisée et marquée « Complet » — elle ne peut pas être sélectionnée</td>
 </tr>
 </tbody>
 </table>
-<hr />
+<p><strong>Exploitation et chaîne DevOps</strong></p>
+<table>
+<thead>
+<tr>
+<th>Capture</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>07-compose-ps.png</code></td>
+<td><code>docker compose ps</code> — les six conteneurs <code>healthy</code></td>
+</tr>
+<tr>
+<td><code>08-swagger.png</code></td>
+<td>Documentation OpenAPI d'un service, générée automatiquement</td>
+</tr>
+<tr>
+<td><code>09-smoke.png</code></td>
+<td>Sortie de <code>make smoke</code> — 27 contrôles, 0 échec</td>
+</tr>
+<tr>
+<td><code>10-ci.png</code></td>
+<td>Un run d'intégration continue entièrement vert, matrice des services visible</td>
+</tr>
+<tr>
+<td><code>11-cd.png</code></td>
+<td>Le pipeline de livraison complet : tests, publication, déploiement et recette</td>
+</tr>
+<tr>
+<td><code>12-packages.png</code></td>
+<td>Les cinq images publiées sur GitHub Container Registry</td>
+</tr>
+<tr>
+<td><code>13-branches.png</code></td>
+<td>L'historique des fusions : <code>feature/*</code> → <code>develop</code> → <code>main</code>, chaque Pull Request numérotée</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Le graphe <strong>Insights → Network</strong> de GitHub n'est pas accessible sur les
+dépôts privés en formule gratuite. Nous lui avons substitué la sortie de
+<code>git log --graph</code>, qui montre la même information — et davantage : les
+messages de commit et le numéro de chaque Pull Request fusionnée.</p>
+</blockquote>
+<p>La capture <code>06</code> mérite une mention : elle montre l'application interrogeant
+simultanément les trois microservices — la liste des événements avec leurs
+places restantes vient du service Événements, la liste des participants du
+service Participants, et la confirmation déclenchera l'orchestration décrite
+au § 2.3.</p>
+<h2>---</h2>
 <h2>7. Difficultés rencontrées et solutions</h2>
 <h3>7.1 Une redirection invisible qui cassait toutes les créations</h3>
 <p><strong>Symptôme.</strong> Les lectures fonctionnaient à travers la gateway, mais les

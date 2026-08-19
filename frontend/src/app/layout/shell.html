@@ -1,0 +1,79 @@
+<button
+  type="button"
+  class="menu-toggle"
+  (click)="toggleMenu()"
+  [attr.aria-expanded]="menuOpen()"
+  aria-label="Ouvrir la navigation"
+>
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+    <path d="M3 6h18M3 12h18M3 18h18" />
+  </svg>
+  <span>EventHub</span>
+</button>
+
+@if (menuOpen()) {
+  <div class="scrim" (click)="closeMenu()"></div>
+}
+
+<aside class="sidebar" [class.sidebar--open]="menuOpen()">
+  <div class="brand">
+    <div class="brand__mark" aria-hidden="true">DIT</div>
+    <div class="brand__text">
+      <strong>EventHub</strong>
+      <span>Dakar Institute of Technology</span>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Navigation principale">
+    @for (item of nav; track item.path) {
+      <a
+        class="nav__link"
+        [routerLink]="item.path"
+        routerLinkActive="nav__link--active"
+        (click)="closeMenu()"
+      >
+        <svg
+          class="nav__icon"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          @switch (item.icon) {
+            @case ('calendar') {
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M3 10h18M8 3v4M16 3v4" />
+            }
+            @case ('users') {
+              <path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 20v-2a4 4 0 0 0-3-3.87" />
+            }
+            @default {
+              <path
+                d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z"
+              />
+              <path d="M13 7v10" stroke-dasharray="2 2" />
+            }
+          }
+        </svg>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <p class="sidebar__footer">Examen DevOps · Master 1 IA</p>
+</aside>
+
+<main class="content"><router-outlet /></main>

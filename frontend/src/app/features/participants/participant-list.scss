@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--dit-border);
+}
+.toolbar .field {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 220px;
+  max-width: 380px;
+}
+.toolbar__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.col-actions {
+  width: 1%;
+}
+@media (max-width: 680px) {
+  .toolbar .field {
+    max-width: none;
+    flex: 1 1 100%;
+  }
+  .toolbar__actions {
+    width: 100%;
+  }
+  .toolbar__actions .btn {
+    flex: 1;
+  }
+  .table__actions {
+    justify-content: flex-start;
+  }
+}

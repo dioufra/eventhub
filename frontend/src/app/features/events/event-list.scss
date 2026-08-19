@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--dit-border);
+}
+.filters .field {
+  margin-bottom: 0;
+  min-width: 190px;
+}
+.filters__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.col-actions {
+  width: 1%;
+}
+.cell-muted {
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 720px) {
+  .filters .field {
+    flex: 1 1 100%;
+  }
+  .filters__actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .filters__actions .btn {
+    flex: 1;
+  }
+  .table__actions {
+    justify-content: flex-start;
+  }
+}

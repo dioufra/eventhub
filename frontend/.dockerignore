@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.angular/
+out-tsc/
+openapi/
+.env
+.git/
+*.md
+.vscode/
+.idea/

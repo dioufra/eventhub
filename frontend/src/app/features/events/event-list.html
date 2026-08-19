@@ -1,0 +1,140 @@
+<app-page-header
+  title="Événements"
+  subtitle="Créez et gérez les événements académiques et culturels du DIT."
+>
+  <a class="btn btn--primary" routerLink="/events/new">Créer un événement</a>
+</app-page-header>
+
+@if (success()) {
+  <p class="alert alert--success">{{ success() }}</p>
+}
+
+@if (blockedDelete()) {
+  <p class="alert alert--warn">{{ blockedDelete() }}</p>
+}
+@if (error() && rows().length) {
+  <p class="alert alert--error">{{ error() }}</p>
+}
+
+<section class="card">
+  <div class="filters">
+    <div class="field">
+      <label class="field__label" for="f-location">Lieu</label>
+      <input
+        id="f-location"
+        class="input"
+        type="text"
+        [ngModel]="location()"
+        (ngModelChange)="location.set($event)"
+        placeholder="Amphi A"
+        (keyup.enter)="load()"
+      />
+    </div>
+    <div class="field">
+      <label class="field__label" for="f-date">Date</label>
+      <input id="f-date" class="input" type="date" [ngModel]="date()" (ngModelChange)="date.set($event)" />
+    </div>
+    <div class="filters__actions">
+      <button type="button" class="btn btn--teal" (click)="load()">Filtrer</button>
+      @if (hasFilters()) {
+        <button type="button" class="btn btn--ghost" (click)="resetFilters()">Réinitialiser</button>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <app-state-panel mode="loading" title="Chargement des événements…" />
+  } @else if (error() && !rows().length) {
+    <app-state-panel mode="error" [message]="error()!" retryLabel="Réessayer" (retry)="load()" />
+  } @else if (!rows().length) {
+    <app-state-panel
+      mode="empty"
+      [title]="hasFilters() ? 'Aucun résultat' : 'Aucun événement'"
+      [message]="
+        hasFilters()
+          ? 'Aucun événement ne correspond à ces critères.'
+          : 'Commencez par créer votre premier événement.'
+      "
+    >
+      @if (hasFilters()) {
+        <button type="button" class="btn btn--ghost" (click)="resetFilters()">
+          Réinitialiser les filtres
+        </button>
+      } @else {
+        <a class="btn btn--primary" routerLink="/events/new">Créer un événement</a>
+      }
+    </app-state-panel>
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Date</th>
+            <th>Lieu</th>
+            <th>Capacité</th>
+            <th>Places restantes</th>
+            <th>État</th>
+            <th class="col-actions"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.id) {
+            <tr>
+              <td class="cell-strong">
+                {{ row.title }}
+                @if (row.description) {
+                  <div class="cell-muted">{{ row.description }}</div>
+                }
+              </td>
+              <td>{{ row.starts_at | date: 'dd/MM/yyyy · HH:mm' }}</td>
+              <td>{{ row.location }}</td>
+              <td>{{ row.capacity }}</td>
+              <td>
+                @if (row.availability) {
+                  <strong>{{ row.availability.seats_available }}</strong>
+                  <span class="cell-muted"> / {{ row.capacity }}</span>
+                } @else {
+                  <span class="cell-muted">—</span>
+                }
+              </td>
+              <td>
+                @if (row.availability?.is_full) {
+                  <span class="badge badge--full">Complet</span>
+                } @else if (row.availability && row.availability.seats_available <= 3) {
+                  <span class="badge badge--soon">Bientôt complet</span>
+                } @else {
+                  <span class="badge badge--open">Ouvert</span>
+                }
+              </td>
+              <td>
+                <div class="table__actions">
+                  <a class="btn btn--ghost btn--sm" [routerLink]="['/events', row.id]">Voir</a>
+                  <a class="btn btn--ghost btn--sm" [routerLink]="['/events', row.id, 'edit']"
+                    >Modifier</a
+                  >
+                  <button type="button" class="btn btn--danger btn--sm" (click)="askDelete(row)">
+                    Supprimer
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+@if (pendingDelete(); as target) {
+  <app-confirm-dialog
+    title="Supprimer cet événement ?"
+    [message]="
+      '« ' + target.title + ' » sera définitivement supprimé. Cette action est irréversible.'
+    "
+    confirmLabel="Supprimer"
+    [busy]="deleting()"
+    (confirm)="confirmDelete()"
+    (cancel)="pendingDelete.set(null)"
+  />
+}

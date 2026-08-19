@@ -1,0 +1,1130 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<title>EventHub — Rapport de projet</title>
+<style>
+@page { size: A4; margin: 20mm 18mm; }
+* { box-sizing: border-box; }
+body { font-family: "DejaVu Sans", "Liberation Sans", Arial, sans-serif;
+       font-size: 10.5pt; line-height: 1.55; color: #1a2422; margin: 0; }
+h1 { font-size: 22pt; color: #0e6c61; margin: 0 0 .3em; letter-spacing: -.02em;
+     border-bottom: 3px solid #0e6c61; padding-bottom: .3em; }
+h2 { font-size: 15pt; color: #0e6c61; margin: 1.8em 0 .6em; padding-top: .5em;
+     border-top: 1px solid #cfdad7; page-break-after: avoid; }
+h3 { font-size: 11.5pt; color: #0a4f47; margin: 1.3em 0 .4em; page-break-after: avoid; }
+p, li { orphans: 3; widows: 3; }
+table { border-collapse: collapse; width: 100%; margin: .8em 0 1.2em;
+        font-size: 9pt; page-break-inside: avoid; }
+th { background: #eef4f2; text-align: left; padding: .45em .6em;
+     border-bottom: 2px solid #9fb8b2; font-size: 8.5pt;
+     text-transform: uppercase; letter-spacing: .04em; }
+td { padding: .4em .6em; border-bottom: 1px solid #e0e8e6; vertical-align: top; }
+pre { background: #f4f7f6; border: 1px solid #dbe4e2; border-left: 3px solid #0e6c61;
+      padding: .7em .9em; font-size: 8pt; line-height: 1.4; overflow-x: auto;
+      page-break-inside: avoid; font-family: "DejaVu Sans Mono", monospace; }
+code { font-family: "DejaVu Sans Mono", monospace; font-size: .88em;
+       background: #eef4f2; padding: .1em .3em; border-radius: 2px; }
+pre code { background: none; padding: 0; }
+blockquote { border-left: 3px solid #f0a500; background: #fdf7ea;
+             margin: 1em 0; padding: .6em .9em; font-size: 9.5pt; }
+blockquote p { margin: .3em 0; }
+hr { border: 0; border-top: 1px solid #cfdad7; margin: 2em 0; }
+sub { color: #667; font-size: 8.5pt; }
+strong { color: #0a2e29; }
+h2, h3 { break-after: avoid; }
+</style></head><body><h1>EventHub — Rapport de projet</h1>
+<p><strong>Examen pratique DevOps</strong> · Master 1 Intelligence Artificielle
+<strong>Dakar Institute of Technology</strong> · Août 2026</p>
+<p><strong>Équipe 6</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nom</th>
+<th>Rôle</th>
+<th>GitHub</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DIOUF François Pape</td>
+<td>Scrum Master</td>
+<td><a href="https://github.com/dioufra">@dioufra</a></td>
+</tr>
+<tr>
+<td>Mohamed Sow</td>
+<td>Développeur</td>
+<td><a href="https://github.com/sultan2096">@sultan2096</a></td>
+</tr>
+<tr>
+<td>Berly Lora</td>
+<td>Développeur</td>
+<td><a href="https://github.com/loraham057-spec">@loraham057-spec</a></td>
+</tr>
+<tr>
+<td>Kra Junior</td>
+<td>Développeur</td>
+<td><a href="https://github.com/KraJunior">@KraJunior</a></td>
+</tr>
+<tr>
+<td>Aichatou Ndaw</td>
+<td>Développeur</td>
+<td><a href="https://github.com/chattoundaw26-tech">@chattoundaw26-tech</a></td>
+</tr>
+</tbody>
+</table>
+<p>Dépôt : <a href="https://github.com/dioufra/eventhub">https://github.com/dioufra/eventhub</a></p>
+<hr />
+<h2>1. Introduction</h2>
+<h3>1.1 Contexte</h3>
+<p>Le Dakar Institute of Technology organise régulièrement des conférences, des
+ateliers et des séminaires. Leur gestion reposait jusqu'ici sur des outils
+dispersés — Google Forms pour les inscriptions, Excel pour les listes, emails
+pour les échanges. Il en résultait trois difficultés : impossibilité de suivre
+les inscriptions en temps réel, absence de vision d'ensemble pour les
+organisateurs, et communication laborieuse avec les participants.</p>
+<h3>1.2 Objectif</h3>
+<p>EventHub réunit ces usages dans une plateforme unique permettant de créer et
+gérer des événements, d'administrer les comptes participants, de gérer les
+inscriptions, et de suivre en temps réel les places restantes et les
+statistiques.</p>
+<h3>1.3 Objectif pédagogique</h3>
+<p>Au-delà du produit, le projet visait à mettre en pratique une chaîne DevOps
+complète : conception en microservices, conteneurisation, intégration et
+déploiement continus, et gestion de projet avec Git et GitHub.</p>
+<h3>1.4 Chiffres du projet</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Microservices backend</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Conteneurs applicatifs</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Endpoints REST</td>
+<td>25</td>
+</tr>
+<tr>
+<td>Tests unitaires</td>
+<td>48</td>
+</tr>
+<tr>
+<td>Contrôles de recette</td>
+<td>27</td>
+</tr>
+<tr>
+<td>Pipelines GitHub Actions</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Architecture</h2>
+<h3>2.1 Vue d'ensemble</h3>
+<pre><code>                          NAVIGATEUR
+                              │
+                              │ http://localhost:8080
+                              ▼
+                 ┌──────────────────────────┐
+                 │        GATEWAY           │   seul conteneur exposé
+                 │     Nginx · port 80      │
+                 └────────────┬─────────────┘
+                              │
+        ┌──────────┬──────────┼───────────────┬────────────────┐
+        │          │          │               │                │
+        ▼          ▼          ▼               ▼                ▼
+   ┌─────────┐ ┌────────┐ ┌──────────────┐ ┌────────────────────┐
+   │frontend │ │ events │ │ participants │ │   registrations    │
+   │ Angular │ │ :8001  │ │    :8002     │ │      :8003         │
+   │  Nginx  │ └────┬───┘ └──────┬───────┘ └──┬──────────┬──────┘
+   └─────────┘      │            │            │          │
+                    │            │            │  appels REST internes
+                    │            │            │  (vérification + réservation)
+                    │            │            │          │
+                    │            └────────────┼──────────┘
+                    └─────────────────────────┘
+                              │
+                              ▼
+                    ┌───────────────────────┐
+                    │   PostgreSQL · 5432   │
+                    │  eventhub_events      │
+                    │  eventhub_participants│
+                    │  eventhub_registration│
+                    └───────────┬───────────┘
+                                │
+                                ▼
+                        volume « pgdata »
+
+     Tous les conteneurs sont sur le réseau bridge « eventhub-net ».
+</code></pre>
+<h3>2.2 Décisions d'architecture</h3>
+<p><strong>Une gateway dédiée, seul point d'entrée.</strong> Un conteneur Nginx reçoit tout le
+trafic et route selon l'URL : <code>/api/events</code> vers le service événements, le
+reste vers le frontend. Aucun autre conteneur ne publie de port.</p>
+<p>Trois bénéfices. La <strong>sécurité</strong> d'abord : ce qui n'est pas exposé ne peut pas
+être attaqué depuis l'extérieur. L'absence totale de <strong>CORS</strong> ensuite, puisque
+le navigateur ne voit qu'une seule origine — c'est le problème numéro un des
+projets microservices, et il disparaît par construction. La <strong>centralisation</strong>
+enfin : en-têtes de sécurité, journalisation et limitation de débit se règlent
+à un seul endroit.</p>
+<p><strong>Une instance PostgreSQL, trois bases logiques.</strong> Le principe microservices
+impose qu'un service ne lise jamais les tables d'un autre. Trois bases
+distinctes — <code>eventhub_events</code>, <code>eventhub_participants</code>,
+<code>eventhub_registrations</code> — garantissent cette isolation. Nous avons mutualisé
+l'instance plutôt que d'en déployer trois : le bénéfice d'isolation est
+identique, pour un tiers des ressources. Passer à trois instances ne demanderait
+que trois blocs supplémentaires dans le fichier d'orchestration.</p>
+<p>Conséquence directe : les colonnes <code>event_id</code> et <code>participant_id</code> de la table
+des inscriptions <strong>ne sont pas des clés étrangères SQL</strong> — elles ne peuvent pas
+l'être, les tables cibles vivant dans d'autres bases. Ce sont des références
+logiques, validées par appel HTTP au moment de l'inscription.</p>
+<p><strong>Pas de service discovery.</strong> Docker fournit nativement un serveur DNS interne :
+dans le réseau <code>eventhub-net</code>, le nom <code>events-service</code> résout vers l'adresse du
+conteneur. Un registre de services comme Consul n'apporterait rien tant qu'il
+n'y a pas plusieurs instances par service.</p>
+<h3>2.3 Le point délicat : la disponibilité des places</h3>
+<p>L'énoncé demande de vérifier les places restantes dans le service Événements,
+alors que les inscriptions vivent dans un autre service. Si chacun interroge
+l'autre, on crée une dépendance circulaire.</p>
+<p>Notre solution maintient un flux <strong>unidirectionnel</strong>. Le service Événements
+détient un compteur <code>seats_taken</code> et expose deux endpoints internes que seul le
+service Inscriptions appelle :</p>
+<pre><code>  registrations-service                          events-service
+          │
+          │ 1. GET /api/participants/{id}  ──▶ participants-service
+          │ ◀── 200 : le participant existe
+          │
+          │ 2. POST /api/events/{id}/seats/reserve ──▶ events-service
+          │                                             incrémente seats_taken
+          │                                             si des places restent,
+          │                                             sinon renvoie 409
+          │ ◀── 200 OK
+          │
+          │ 3. Enregistrement en base locale
+          ▼
+      201 Created
+</code></pre>
+<p>Le service Inscriptions dépend des deux autres ; l'inverse n'est jamais vrai.
+Aucun cycle.</p>
+<p>La réservation est protégée par un verrou SQL (<code>SELECT ... FOR UPDATE</code>). Sans
+lui, deux inscriptions simultanées sur la dernière place liraient toutes deux
+la même valeur et l'écriraient toutes deux : on obtiendrait 51 inscrits pour
+50 places.</p>
+<hr />
+<h2>3. Description des microservices</h2>
+<blockquote>
+<p><strong>Modèle de données détaillé</strong> : le document <a href="MODELE-DONNEES.md">MODELE-DONNEES.md</a>
+présente les deux vues complémentaires — le modèle conceptuel (domaine
+métier) et le modèle physique (répartition réelle en trois bases). La
+distinction est importante : le MCD laisserait croire à des clés étrangères
+entre les trois tables, alors qu'il n'en existe aucune.</p>
+</blockquote>
+<p>Les trois services partagent la même organisation interne, ce qui permet de les
+relire sans effort et d'écrire un pipeline unique qui les traite tous par
+matrice.</p>
+<pre><code>&lt;service&gt;/
+├── app/
+│   ├── main.py       point d'entrée, sondes de santé
+│   ├── config.py     configuration par variables d'environnement
+│   ├── database.py   connexion PostgreSQL
+│   ├── models.py     tables SQLAlchemy
+│   ├── schemas.py    validation Pydantic
+│   └── routes.py     endpoints REST
+└── tests/
+</code></pre>
+<h3>3.1 Service Événements — port 8001</h3>
+<p><strong>Modèle de données</strong> — table <code>events</code></p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Contrainte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>integer</td>
+<td>clé primaire</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>varchar(200)</td>
+<td>non nul, 3 caractères minimum</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>text</td>
+<td>facultatif</td>
+</tr>
+<tr>
+<td><code>starts_at</code></td>
+<td>timestamp</td>
+<td>non nul, indexé</td>
+</tr>
+<tr>
+<td><code>location</code></td>
+<td>varchar(200)</td>
+<td>non nul, indexé</td>
+</tr>
+<tr>
+<td><code>capacity</code></td>
+<td>integer</td>
+<td>non nul, supérieur à 0</td>
+</tr>
+<tr>
+<td><code>seats_taken</code></td>
+<td>integer</td>
+<td>non nul, défaut 0</td>
+</tr>
+<tr>
+<td><code>created_at</code>, <code>updated_at</code></td>
+<td>timestamp</td>
+<td>automatiques</td>
+</tr>
+</tbody>
+</table>
+<p>Les index sur <code>starts_at</code> et <code>location</code> correspondent aux filtres demandés.</p>
+<p><strong>Endpoints</strong></p>
+<table>
+<thead>
+<tr>
+<th>Méthode</th>
+<th>Chemin</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/events</code></td>
+<td>Lister, filtres <code>?date=</code> et <code>?location=</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/events</code></td>
+<td>Créer</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/events/{id}</code></td>
+<td>Détails</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/events/{id}</code></td>
+<td>Modifier</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/events/{id}</code></td>
+<td>Supprimer</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/events/{id}/availability</code></td>
+<td>Places restantes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/events/{id}/seats/reserve</code></td>
+<td><em>(interne)</em> Réserver une place</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/events/{id}/seats/release</code></td>
+<td><em>(interne)</em> Libérer une place</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Règles métier</strong> — la capacité ne peut pas être ramenée sous le nombre
+d'inscrits (409) ; la réservation sur un événement complet est refusée (409) ;
+la libération ne descend jamais sous zéro.</p>
+<h3>3.2 Service Participants — port 8002</h3>
+<p><strong>Modèle de données</strong> — table <code>participants</code></p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Contrainte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>integer</td>
+<td>clé primaire</td>
+</tr>
+<tr>
+<td><code>full_name</code></td>
+<td>varchar(150)</td>
+<td>non nul, indexé</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>varchar(150)</td>
+<td>non nul, <strong>unique</strong>, indexé</td>
+</tr>
+<tr>
+<td><code>phone</code></td>
+<td>varchar(30)</td>
+<td>facultatif</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>varchar(20)</td>
+<td><code>etudiant</code> | <code>professeur</code> | <code>externe</code></td>
+</tr>
+<tr>
+<td><code>created_at</code>, <code>updated_at</code></td>
+<td>timestamp</td>
+<td>automatiques</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Endpoints</strong></p>
+<table>
+<thead>
+<tr>
+<th>Méthode</th>
+<th>Chemin</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/participants</code></td>
+<td>Lister, recherche <code>?search=</code> sur nom ou email</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/participants</code></td>
+<td>Créer</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/participants/{id}</code></td>
+<td>Détails</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/participants/{id}</code></td>
+<td>Modifier</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/participants/{id}</code></td>
+<td>Supprimer</td>
+</tr>
+</tbody>
+</table>
+<p>L'unicité de l'email est garantie à deux niveaux : contrôle applicatif renvoyant
+un 409 explicite, et contrainte <code>UNIQUE</code> en base qui tient même si deux requêtes
+arrivent exactement en même temps.</p>
+<h3>3.3 Service Inscriptions — port 8003</h3>
+<p><strong>Modèle de données</strong> — table <code>registrations</code></p>
+<table>
+<thead>
+<tr>
+<th>Colonne</th>
+<th>Type</th>
+<th>Contrainte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>integer</td>
+<td>clé primaire</td>
+</tr>
+<tr>
+<td><code>event_id</code></td>
+<td>integer</td>
+<td>non nul, indexé, référence <strong>logique</strong></td>
+</tr>
+<tr>
+<td><code>participant_id</code></td>
+<td>integer</td>
+<td>non nul, indexé, référence <strong>logique</strong></td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>varchar(20)</td>
+<td><code>confirmed</code> | <code>cancelled</code></td>
+</tr>
+<tr>
+<td><code>created_at</code>, <code>updated_at</code></td>
+<td>timestamp</td>
+<td>automatiques</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Endpoints</strong></p>
+<table>
+<thead>
+<tr>
+<th>Méthode</th>
+<th>Chemin</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/registrations</code></td>
+<td>Lister</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/registrations</code></td>
+<td>Inscrire</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/registrations/{id}</code></td>
+<td>Annuler</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/registrations/event/{id}</code></td>
+<td>Inscriptions d'un événement</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/registrations/participant/{id}</code></td>
+<td>Événements d'un participant</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/registrations/stats</code></td>
+<td>Statistiques</td>
+</tr>
+</tbody>
+</table>
+<p>C'est le seul service qui communique avec les autres. Son module <code>clients.py</code>
+encapsule ces appels, avec un <strong>délai d'attente maximal de 5 secondes</strong> : sans
+lui, un service bloqué bloquerait toute la chaîne jusqu'au navigateur.</p>
+<p>L'annulation est <strong>logique</strong> : la ligne passe en <code>cancelled</code> plutôt que d'être
+supprimée, ce qui préserve l'historique pour les statistiques. Une seconde
+annulation est sans effet — la place n'est pas libérée deux fois.</p>
+<h3>3.4 Sondes de santé</h3>
+<p>Chaque service expose deux sondes, distinction reprise des standards de
+production :</p>
+<table>
+<thead>
+<tr>
+<th>Sonde</th>
+<th>Question</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/health</code></td>
+<td>Le processus répond-il ?</td>
+<td><code>HEALTHCHECK</code> Docker</td>
+</tr>
+<tr>
+<td><code>/health/ready</code></td>
+<td>Le service <strong>et sa base</strong> répondent-ils ?</td>
+<td>Supervision</td>
+</tr>
+</tbody>
+</table>
+<p><code>/health/ready</code> renvoie un 503 si PostgreSQL est injoignable. Nous n'utilisons
+volontairement pas cette sonde dans le <code>HEALTHCHECK</code> : une base momentanément
+lente ferait passer tous les conteneurs en <code>unhealthy</code> et déclencherait des
+redémarrages en cascade.</p>
+<hr />
+<h2>4. Dockerisation</h2>
+<p>Cinq images sont construites, une par composant applicatif, plus l'image
+officielle de PostgreSQL.</p>
+<table>
+<thead>
+<tr>
+<th>Image</th>
+<th>Base</th>
+<th>Taille finale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eventhub-events-service</code></td>
+<td><code>python:3.12-alpine</code></td>
+<td>193 Mo</td>
+</tr>
+<tr>
+<td><code>eventhub-participants-service</code></td>
+<td><code>python:3.12-alpine</code></td>
+<td>193 Mo</td>
+</tr>
+<tr>
+<td><code>eventhub-registrations-service</code></td>
+<td><code>python:3.12-alpine</code></td>
+<td>193 Mo</td>
+</tr>
+<tr>
+<td><code>eventhub-frontend</code></td>
+<td><code>nginx:1.30-alpine</code></td>
+<td>94 Mo</td>
+</tr>
+<tr>
+<td><code>eventhub-gateway</code></td>
+<td><code>nginx:1.30-alpine</code></td>
+<td>93 Mo</td>
+</tr>
+</tbody>
+</table>
+<h3>4.1 Choix des images de base</h3>
+<p>L'énoncé demande des images légères. Nous avons retenu <strong>Alpine</strong> partout.</p>
+<p>Ce choix a une conséquence sur le pilote PostgreSQL. Le pilote le plus répandu,
+<code>psycopg2</code>, est écrit en C : sur Alpine il faudrait installer un compilateur et
+les en-têtes de la bibliothèque cliente PostgreSQL, soit environ 200 Mo
+supplémentaires. Nous avons retenu <strong><code>pg8000</code></strong>, un pilote entièrement écrit en
+Python, qui s'installe sans rien compiler. C'est ce qui permet de rester sur
+Alpine sans surcoût.</p>
+<h3>4.2 Build multi-étapes pour le frontend</h3>
+<p>Le frontend est le cas où le multi-étapes est le plus spectaculaire :</p>
+<pre><code class="language-dockerfile"># ÉTAPE 1 — compilation avec Node
+FROM node:20-alpine AS build
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps        # couche mise en cache
+COPY . .
+RUN npm run build -- --configuration=production
+
+# ÉTAPE 2 — l'image finale ne garde que le résultat
+FROM nginx:1.30.4-alpine
+COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+</code></pre>
+<p>L'étape de compilation a besoin de Node, du CLI Angular et d'environ 500 Mo de
+dépendances. L'image finale ne contient que des fichiers HTML, CSS et
+JavaScript : <strong>94 Mo au lieu de plus de 600</strong>.</p>
+<h3>4.3 Les choix appliqués à chaque Dockerfile</h3>
+<p><strong>Ordre des instructions.</strong> Les dépendances sont copiées et installées avant le
+code applicatif. Docker met chaque couche en cache : comme <code>requirements.txt</code>
+change rarement et le code souvent, cette seule règle fait passer les
+reconstructions de plus d'une minute à quelques secondes.</p>
+<p><strong>Utilisateur non privilégié.</strong> Chaque image crée un utilisateur <code>appuser</code> et
+bascule dessus avant de lancer l'application. Si une faille était exploitée,
+l'attaquant ne serait pas <code>root</code> dans le conteneur.</p>
+<p><strong>Sonde de santé.</strong> Chaque image déclare un <code>HEALTHCHECK</code>. Ce n'est pas
+décoratif : l'orchestration utilise <code>depends_on: condition: service_healthy</code>,
+et un conteneur sans sonde ne devient jamais sain — la gateway ne démarrerait
+jamais.</p>
+<p><strong>Écoute sur toutes les interfaces.</strong> Les services sont lancés avec
+<code>--host 0.0.0.0</code>. Par défaut, uvicorn n'écoute que sur la boucle locale : le
+conteneur démarrerait normalement et refuserait toutes les connexions.</p>
+<p><strong>Sortie non tamponnée.</strong> <code>PYTHONUNBUFFERED=1</code> fait apparaître les journaux
+immédiatement dans <code>docker logs</code>, sans quoi ils arrivent avec du retard, voire
+pas du tout si le conteneur s'arrête brutalement.</p>
+<p><strong><code>.dockerignore</code>.</strong> Chaque service exclut environnements virtuels, caches,
+tests et surtout le fichier <code>.env</code>. Sans cela, des identifiants pourraient se
+retrouver dans une image publiée.</p>
+<h3>4.4 Orchestration</h3>
+<p>Trois fichiers se combinent :</p>
+<table>
+<thead>
+<tr>
+<th>Fichier</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td>Base commune : 6 services, réseau, volume</td>
+</tr>
+<tr>
+<td><code>docker-compose.override.yml</code></td>
+<td>Développement — chargé automatiquement</td>
+</tr>
+<tr>
+<td><code>docker-compose.prod.yml</code></td>
+<td>Production — à préciser explicitement</td>
+</tr>
+</tbody>
+</table>
+<p>En développement, la surcharge publie les ports des services pour accéder à
+leur documentation interactive, et monte le code depuis l'hôte : une
+modification est prise en compte en une seconde au lieu de reconstruire l'image.</p>
+<p>En production, la section <code>build</code> est neutralisée — on ne compile rien, on tire
+les images publiées — aucun port n'est publié sauf celui de la gateway, et des
+limites de processeur et de mémoire sont appliquées.</p>
+<p><strong>Ordonnancement du démarrage.</strong> Les dépendances utilisent
+<code>condition: service_healthy</code>. Sans cela, les services tenteraient de joindre
+PostgreSQL avant qu'il n'accepte les connexions. C'est la version déclarative
+de ce qu'on écrirait sinon à la main dans un script d'attente.</p>
+<p><strong>Persistance.</strong> Un volume nommé <code>pgdata</code> conserve les données. Nous l'avons
+vérifié en créant un événement, en supprimant les conteneurs par
+<code>docker compose down</code>, puis en les relançant : l'événement était toujours là.</p>
+<p><strong>Journalisation.</strong> Une politique de rotation limite chaque conteneur à 30 Mo
+de journaux. Sans elle, les fichiers peuvent saturer le disque d'un serveur en
+quelques jours.</p>
+<hr />
+<h2>5. Intégration et déploiement continus</h2>
+<p>Deux pipelines GitHub Actions, séparés parce qu'ils répondent à deux questions
+différentes : <em>le code est-il correct ?</em> et <em>comment le livrer ?</em></p>
+<pre><code>  feature/xxx ──push──▶  ci.yml   ──▶ tests, build, images
+                                          │
+   Pull Request ──────▶  ci.yml   ──▶ statut obligatoire pour fusionner
+                                          │
+       develop ──push──▶  ci.yml
+                                          │
+                   PR develop → main
+                                          ▼
+          main ──push──▶  cd.yml   ──▶ tests ▸ publication GHCR ▸ déploiement
+</code></pre>
+<h3>5.1 Le pipeline d'intégration — <code>ci.yml</code></h3>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compose</code></td>
+<td>Valide l'orchestration, vérifie qu'un seul port est publié en production et que le script d'initialisation crée bien trois bases</td>
+</tr>
+<tr>
+<td><code>backend</code></td>
+<td>Tests unitaires des trois services, en <strong>matrice parallèle</strong></td>
+</tr>
+<tr>
+<td><code>frontend</code></td>
+<td>Installation, compilation de production, vérification du chemin de sortie</td>
+</tr>
+<tr>
+<td><code>images</code></td>
+<td>Construction des cinq images, sans publication</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Actions utilisées</strong> : <code>actions/checkout@v4</code>, <code>actions/setup-python@v5</code>,
+<code>actions/setup-node@v4</code>, <code>docker/setup-buildx-action@v3</code>,
+<code>docker/build-push-action@v6</code>.</p>
+<p>Deux choix méritent d'être signalés.</p>
+<p><strong>La matrice.</strong> Le job de tests est écrit une fois et s'exécute trois fois en
+parallèle, une par service. C'est le bénéfice direct de la structure interne
+identique imposée aux trois services : sans elle, il aurait fallu écrire trois
+jobs.</p>
+<p><strong>Une CI progressive.</strong> Chaque job commence par vérifier si son périmètre est
+implémenté. Tant qu'un service est vide, l'étape est ignorée avec un message
+plutôt que de faire échouer le pipeline. Nous avons adopté cette conception au
+démarrage du projet, quand la plupart des fichiers étaient encore vides : une
+CI systématiquement rouge n'est plus lue par personne, et l'alerte se noie dans
+le bruit le jour où un vrai problème survient. Le pipeline s'est ainsi activé
+tout seul, service après service, sans qu'une seule ligne du fichier ait été
+modifiée.</p>
+<h3>5.2 Le pipeline de livraison — <code>cd.yml</code></h3>
+<p>Déclenché sur <code>main</code> uniquement.</p>
+<table>
+<thead>
+<tr>
+<th>Étape</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Tests</td>
+<td>Rejeu des tests unitaires — on ne publie jamais sans revalider</td>
+</tr>
+<tr>
+<td>2. Publication</td>
+<td>Cinq images poussées sur <strong>GitHub Container Registry</strong></td>
+</tr>
+<tr>
+<td>3. Déploiement</td>
+<td>Pile démarrée depuis les images publiées</td>
+</tr>
+<tr>
+<td>4. Recette</td>
+<td>27 contrôles de bout en bout</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pourquoi GHCR plutôt que Docker Hub.</strong> Le jeton <code>GITHUB_TOKEN</code> est fourni
+automatiquement par GitHub Actions : aucun compte supplémentaire, aucun secret
+à créer et donc aucun risque de fuite d'identifiants. Le job déclare
+<code>permissions: packages: write</code>, application du principe du moindre privilège.</p>
+<p><strong>Étiquetage des images.</strong> Chaque image reçoit deux étiquettes : <code>latest</code>, et
+<code>sha-&lt;commit&gt;</code>. La seconde est la plus précieuse — elle permet de répondre avec
+certitude à la question « quel code tourne exactement en production ? ».</p>
+<p><strong>Sur le déploiement.</strong> Ne disposant pas de serveur dédié, l'étape de
+déploiement s'exécute <strong>sur le runner GitHub, à partir des images publiées sur
+GHCR</strong>. La pile de production complète est réellement démarrée, attendue
+jusqu'à ce que les six conteneurs soient sains, puis soumise aux 27 contrôles
+de recette. Ce n'est donc pas une simulation : les images livrées sont
+effectivement déployées et éprouvées. Le script de déploiement par SSH vers un
+serveur réel figure en commentaire à la fin du fichier, prêt à être activé dès
+qu'une machine sera disponible.</p>
+<p>Nous préférons documenter cette limite plutôt que de la masquer.</p>
+<h3>5.3 Gestion du projet</h3>
+<p><strong>Stratégie de branches</strong> conforme à l'énoncé : <code>feature/*</code> pour le
+développement, <code>develop</code> pour l'intégration, <code>main</code> pour la production. Aucun
+commit n'a été poussé directement sur <code>main</code>.</p>
+<p><strong>Suivi par issues.</strong> Le backlog a été découpé en 52 issues, chacune reliée à
+une exigence de l'énoncé et suivie dans un tableau GitHub Projects avec des
+champs d'estimation, de priorité et de sprint. Chaque branche est créée depuis
+son issue par <code>gh issue develop</code>, ce qui lie automatiquement les deux, et
+chaque Pull Request ferme les issues correspondantes à la fusion.</p>
+<h3>5.4 Qualité et sécurité</h3>
+<table>
+<thead>
+<tr>
+<th>Mesure</th>
+<th>Où</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conteneurs non privilégiés</td>
+<td>Chaque <code>Dockerfile</code></td>
+</tr>
+<tr>
+<td>Images de base minimales</td>
+<td>Alpine partout</td>
+</tr>
+<tr>
+<td>Build multi-étapes</td>
+<td>Frontend</td>
+</tr>
+<tr>
+<td><code>.dockerignore</code> et <code>.gitignore</code></td>
+<td>Empêchent secrets et caches d'être diffusés</td>
+</tr>
+<tr>
+<td>Aucun secret versionné</td>
+<td><code>.env</code> ignoré, <code>.env.example</code> fourni comme modèle</td>
+</tr>
+<tr>
+<td>Un seul port exposé</td>
+<td><code>docker-compose.prod.yml</code></td>
+</tr>
+<tr>
+<td><code>no-new-privileges</code></td>
+<td>Production</td>
+</tr>
+<tr>
+<td>Limites processeur et mémoire</td>
+<td>Production</td>
+</tr>
+<tr>
+<td>Validation des entrées</td>
+<td>Schémas Pydantic</td>
+</tr>
+<tr>
+<td>Requêtes paramétrées</td>
+<td>SQLAlchemy, protège des injections SQL</td>
+</tr>
+<tr>
+<td>Délais d'attente sur les appels</td>
+<td><code>clients.py</code></td>
+</tr>
+<tr>
+<td>En-têtes de sécurité HTTP</td>
+<td>Gateway</td>
+</tr>
+<tr>
+<td>Rotation des journaux</td>
+<td>Orchestration</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. Interface</h2>
+<p>L'interface est développée en <strong>Angular 20</strong> et servie sous forme de fichiers
+statiques par Nginx.</p>
+<h3>6.1 Génération automatique des clients d'API</h3>
+<p>Plutôt que d'écrire à la main les modèles TypeScript et les appels HTTP, nous
+les <strong>générons depuis les spécifications OpenAPI</strong> que FastAPI expose
+automatiquement.</p>
+<pre><code class="language-bash">npm run api:refresh     # récupère les 3 spécifications, régénère les clients
+</code></pre>
+<p>83 fichiers sont produits — modèles et services typés — et versionnés avec le
+projet.</p>
+<p>Le bénéfice n'est pas le temps gagné, mais la <strong>fiabilité</strong> : si un champ change
+côté serveur, la régénération casse la compilation TypeScript au lieu de
+produire un bug silencieux à l'exécution. Aucune dérive n'est possible entre le
+contrat d'API et son utilisation.</p>
+<p>Nous avons ajouté côté FastAPI une fonction de nommage des opérations, sans
+laquelle les méthodes générées portaient des noms illisibles :
+<code>listEventsApiEventsGet()</code> est ainsi devenu <code>listEvents()</code>.</p>
+<h3>6.2 Adresses relatives : le point de configuration décisif</h3>
+<p>Les clients générés utilisent par défaut l'adresse absolue <code>http://localhost</code>.
+En conteneur, le navigateur aurait appelé le port 80 de la machine de
+l'utilisateur au lieu de passer par la gateway.</p>
+<p>Nous forçons une adresse de base <strong>vide</strong>, ce qui rend tous les appels relatifs
+(<code>/api/events</code>). En développement, le proxy du serveur Angular les redirige vers
+les ports 8001 à 8003 ; en conteneur, la gateway les route vers les
+microservices.</p>
+<p>Conséquence importante : <strong>la même image fonctionne en développement comme en
+production</strong>, sans aucune variable d'environnement. C'est nécessaire parce
+qu'Angular compile ses fichiers au moment du build — une variable fournie au
+démarrage du conteneur n'aurait aucun effet.</p>
+<h3>6.3 Écrans</h3>
+<table>
+<thead>
+<tr>
+<th>Écran</th>
+<th>Fonctionnalités</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Événements</strong></td>
+<td>Liste, filtres par date et par lieu, places restantes, état ouvert ou complet</td>
+</tr>
+<tr>
+<td><strong>Création d'événement</strong></td>
+<td>Formulaire avec validation</td>
+</tr>
+<tr>
+<td><strong>Participants</strong></td>
+<td>Liste, recherche par nom ou email, création</td>
+</tr>
+<tr>
+<td><strong>Inscriptions</strong></td>
+<td>Parcours guidé : événement, participant, résumé, confirmation</td>
+</tr>
+</tbody>
+</table>
+<p>L'interface reprend l'identité visuelle du DIT et gère les états de chargement,
+d'erreur et de liste vide.</p>
+<h3>6.4 Captures d'écran</h3>
+<blockquote>
+<p><strong>À insérer avant le rendu.</strong> Placer les fichiers dans <code>docs/captures/</code>.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Capture</th>
+<th>Contenu attendu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>01-evenements.png</code></td>
+<td>Liste des événements avec les places restantes</td>
+</tr>
+<tr>
+<td><code>02-creation-evenement.png</code></td>
+<td>Formulaire de création</td>
+</tr>
+<tr>
+<td><code>03-participants.png</code></td>
+<td>Liste et recherche</td>
+</tr>
+<tr>
+<td><code>04-inscription.png</code></td>
+<td>Parcours d'inscription avec le résumé</td>
+</tr>
+<tr>
+<td><code>05-evenement-complet.png</code></td>
+<td>Un événement complet, confirmation désactivée</td>
+</tr>
+<tr>
+<td><code>06-compose-ps.png</code></td>
+<td><code>docker compose ps</code> — les 6 conteneurs sains</td>
+</tr>
+<tr>
+<td><code>07-swagger.png</code></td>
+<td>Documentation interactive d'un service</td>
+</tr>
+<tr>
+<td><code>08-ci.png</code></td>
+<td>Un run CI entièrement vert</td>
+</tr>
+<tr>
+<td><code>09-cd.png</code></td>
+<td>Un run CD jusqu'au déploiement</td>
+</tr>
+<tr>
+<td><code>10-packages.png</code></td>
+<td>Les 5 images publiées sur GHCR</td>
+</tr>
+<tr>
+<td><code>11-smoke.png</code></td>
+<td>Sortie de <code>make smoke</code> — 27 contrôles réussis</td>
+</tr>
+<tr>
+<td><code>12-branches.png</code></td>
+<td>Le graphe des branches (Insights → Network)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>7. Difficultés rencontrées et solutions</h2>
+<h3>7.1 Une redirection invisible qui cassait toutes les créations</h3>
+<p><strong>Symptôme.</strong> Les lectures fonctionnaient à travers la gateway, mais les
+créations échouaient sans message clair.</p>
+<p><strong>Cause.</strong> La configuration Nginx déclarait <code>location /api/events/</code>, avec une
+barre oblique finale. Nginx applique alors une règle documentée mais peu
+connue : une requête vers <code>/api/events</code>, sans barre finale, reçoit une
+redirection permanente <code>301</code>. Or un <code>POST</code> redirigé en 301 est converti en <code>GET</code>
+par la plupart des clients, <strong>et perd son corps de requête</strong>. La création
+d'événement échouait donc silencieusement.</p>
+<p><strong>Résolution.</strong> Nous avons monté un banc d'essai avec des services factices pour
+observer le comportement réel :</p>
+<pre><code>AVANT   POST /api/events → HTTP 301     la requête n'atteint jamais le service
+APRÈS   POST /api/events → HTTP 200
+</code></pre>
+<p>Le correctif tient en un caractère : retirer la barre oblique finale des
+directives <code>location</code>.</p>
+<p><strong>Ce que nous en retenons.</strong> Un test de lecture ne prouve rien sur les
+écritures. C'est ce qui nous a conduits à écrire une recette qui exerce
+réellement chaque verbe HTTP.</p>
+<h3>7.2 Deux conventions d'URL incompatibles</h3>
+<p><strong>Symptôme.</strong> Le service Inscriptions répondait parfaitement à ses tests
+unitaires, mais renvoyait 404 pour tous les appels passant par la gateway.</p>
+<p><strong>Cause.</strong> Le service exposait ses routes sous <code>/registrations/…</code> tandis que la
+gateway transmettait <code>/api/registrations/…</code>. Les tests unitaires attaquant le
+service en direct, ils ne pouvaient pas détecter l'écart.</p>
+<p><strong>Résolution.</strong> Alignement sur une convention unique : le préfixe <code>/api</code> est
+porté par le service lui-même, et la gateway ne réécrit aucune URL. L'adresse
+appelée par le navigateur est exactement celle que reçoit le service, ce qui
+simplifie considérablement le diagnostic.</p>
+<p>Nous avons ajouté un test dédié dans chaque service, qui vérifie que les routes
+répondent bien sous <code>/api/</code> et pas ailleurs.</p>
+<h3>7.3 Des tests verts qui auraient dû être rouges</h3>
+<p><strong>Symptôme.</strong> Les tests d'un service passaient en local et échouaient en
+intégration continue.</p>
+<p><strong>Cause.</strong> La création des tables était appelée au niveau du module, donc
+exécutée dès l'import. Les tests tentaient ainsi de joindre PostgreSQL avant
+même de commencer. En local la base tournait, ce qui masquait le problème ; sur
+le runner, aucune base n'est disponible.</p>
+<p><strong>Résolution.</strong> Déplacement de cette création dans l'événement de démarrage de
+l'application. Les tests n'ouvrent plus aucune connexion réelle et utilisent une
+base SQLite en mémoire.</p>
+<p><strong>Vérification.</strong> Nous avons arrêté PostgreSQL et relancé les suites : les 48
+tests passent sans aucune base, ce qui correspond aux conditions du runner.</p>
+<h3>7.4 Un conteneur qui ne devenait jamais sain</h3>
+<p><strong>Symptôme.</strong> La gateway refusait de démarrer.</p>
+<p><strong>Cause.</strong> L'orchestration attend <code>condition: service_healthy</code> sur ses
+dépendances. L'un des Dockerfile ne déclarait pas de <code>HEALTHCHECK</code> : son
+conteneur ne pouvait donc jamais être considéré comme sain, et la gateway
+attendait indéfiniment.</p>
+<p><strong>Résolution.</strong> Ajout d'une sonde à chaque image.</p>
+<h3>7.5 Un test qui ne testait rien</h3>
+<p><strong>Symptôme.</strong> Un contrôle de recette attendait un 409 et recevait un 422.</p>
+<p><strong>Cause.</strong> Pour vérifier qu'on ne peut pas réduire la capacité sous le nombre
+d'inscrits, nous envoyions une capacité de zéro — valeur déjà rejetée par la
+validation, avant d'atteindre la règle métier. Le code était correct ; le test,
+lui, ne prouvait rien.</p>
+<p><strong>Résolution.</strong> Reformulation du scénario : un événement à deux places, deux
+inscrits, puis une tentative de réduction à une place. La règle est désormais
+réellement éprouvée, et le cas passant a été ajouté.</p>
+<h3>7.6 Concilier les emplois du temps de l'équipe</h3>
+<p>La difficulté la plus structurante n'était pas technique. Entre les cours, les
+stages et les projets d'autres modules, les créneaux de travail des cinq membres
+se recoupaient rarement. Une organisation classique — tout le monde avance en
+parallèle, on synchronise en fin de journée — n'était pas applicable.</p>
+<p><strong>Ce que nous avons mis en place.</strong></p>
+<p>Un <strong>découpage par périmètre exclusif</strong> : chaque membre possède un dossier
+— un microservice, le frontend, l'infrastructure — et personne d'autre n'y
+touche. Cela supprime les conflits Git, mais surtout cela permet d'avancer sans
+attendre la disponibilité d'un autre.</p>
+<p>Des <strong>contrats d'API figés dès le premier jour</strong>, avant toute ligne de code.
+Le service Inscriptions a ainsi pu être développé et testé contre des appels
+neutralisés, alors que les deux services qu'il interroge n'existaient pas
+encore. Sans ce contrat écrit, il aurait fallu attendre — et cette attente
+aurait été fatale au planning.</p>
+<p>Une <strong>structure interne identique</strong> imposée aux trois microservices. Le premier
+service a demandé une journée complète ; le deuxième, construit sur le même
+moule, quelques heures. C'est aussi ce qui a permis d'écrire un pipeline
+d'intégration unique traitant les trois services par matrice, plutôt que trois
+jobs distincts.</p>
+<p>Une <strong>intégration continue progressive</strong>, qui ignore proprement les périmètres
+non encore livrés au lieu d'échouer. Chaque membre pouvait ainsi pousser son
+travail sans casser le pipeline des autres, et les tests s'activaient
+automatiquement à mesure que le code arrivait.</p>
+<p>La <strong>discipline des branches et des Pull Requests</strong> a été maintenue en toutes
+circonstances, y compris pour les tâches menées sans binôme :
+l'énoncé l'évalue explicitement, et la revue croisée reste le meilleur moyen
+d'attraper une erreur avant qu'elle n'atteigne la branche principale.</p>
+<p><strong>Ce que nous en retenons.</strong> Une architecture pensée pour l'indépendance des
+composants ne sert pas qu'à la production : elle rend une équipe aux
+disponibilités décalées capable de livrer. Le découpage en microservices, les
+contrats d'API et l'uniformité des structures ont eu autant de valeur
+organisationnelle que technique.</p>
+<h2>8. Améliorations possibles</h2>
+<h3>8.1 Migrations de schéma</h3>
+<p>Les tables sont créées au démarrage si elles n'existent pas. Cette approche ne
+gère pas l'évolution du schéma : ajouter une colonne à une base contenant déjà
+des données demanderait une intervention manuelle. <strong>Alembic</strong> versionnerait les
+migrations et permettrait les retours arrière.</p>
+<h3>8.2 Transactions distribuées</h3>
+<p>Notre inscription réserve une place puis enregistre en base. Si l'écriture
+échoue, une transaction compensatoire libère la place. Ce mécanisme couvre le
+cas courant, mais pas tous : si le service tombe entre les deux opérations, la
+place reste réservée sans inscription correspondante.</p>
+<p>Le motif <strong>Saga</strong>, avec un journal d'événements persistant, garantirait la
+cohérence même en cas d'arrêt brutal.</p>
+<h3>8.3 Communication asynchrone</h3>
+<p>Les appels entre services sont synchrones : si le service Événements est
+indisponible, aucune inscription n'est possible. Un bus de messages
+(RabbitMQ, Kafka) permettrait de découpler ces échanges — le service
+Inscriptions accepterait la demande et la traiterait dès que possible.</p>
+<h3>8.4 Authentification</h3>
+<p>L'application n'a aujourd'hui aucun contrôle d'accès : n'importe qui peut créer
+ou supprimer un événement. Un fournisseur d'identité OAuth2 / OpenID Connect,
+tel que <strong>Keycloak</strong>, sécuriserait les endpoints d'administration. La gateway
+est déjà le point de passage obligé : c'est là que la vérification des jetons se
+brancherait, sans modifier les microservices.</p>
+<h3>8.5 Orchestration à plus grande échelle</h3>
+<p>Docker Compose convient parfaitement à un serveur unique, mais ne gère ni la
+haute disponibilité, ni la montée en charge automatique, ni les déploiements
+progressifs. <strong>Kubernetes</strong> apporterait réplicas, redémarrages automatiques et
+déploiements sans interruption de service.</p>
+<h3>8.6 Observabilité</h3>
+<p>Nos journaux et nos sondes sont locaux à chaque conteneur. Une stack
+<strong>Prometheus, Grafana et Loki</strong>, complétée par un traçage distribué
+<strong>OpenTelemetry</strong>, donnerait une vue de bout en bout : on pourrait suivre une
+inscription à travers les trois services et identifier précisément où le temps
+est passé.</p>
+<h3>8.7 Couverture de tests</h3>
+<p>Nous couvrons l'unitaire, plus une recette de bout en bout. Deux niveaux
+manquent : des <strong>tests d'intégration</strong> avec une vraie base PostgreSQL
+(Testcontainers), et des <strong>tests de bout en bout dans un navigateur</strong>
+(Playwright ou Cypress) pour valider les parcours utilisateur.</p>
+<h3>8.8 Déploiement progressif</h3>
+<p>Le déploiement actuel remplace directement les conteneurs, avec une brève
+interruption. Une stratégie <strong>blue-green</strong> ou <strong>canary</strong> permettrait de basculer
+sans coupure et de revenir en arrière instantanément.</p>
+<h3>8.9 Sécurité renforcée</h3>
+<p>Trois pistes : un <strong>utilisateur PostgreSQL par service</strong>, avec accès à sa seule
+base — application stricte du moindre privilège ; une <strong>limitation de débit</strong> au
+niveau de la gateway ; et une <strong>analyse de vulnérabilités</strong> des images, avec
+Trivy, intégrée au pipeline.</p>
+<hr />
+<h2>9. Conclusion</h2>
+<p>EventHub répond aux exigences de l'énoncé : trois microservices communiquant en
+REST, une base relationnelle, un <code>Dockerfile</code> par composant, une orchestration
+complète et un pipeline d'intégration et de déploiement continus.</p>
+<p>Sur le plan technique, deux décisions se sont révélées structurantes. La
+<strong>gateway comme point d'entrée unique</strong> a supprimé par construction toute la
+problématique CORS et centralisé la sécurité. La <strong>structure interne identique
+imposée aux trois services</strong> a permis d'écrire un pipeline unique par matrice et
+de dupliquer un service en une fraction du temps nécessaire à sa création — ce
+qui s'est avéré décisif compte tenu des emplois du temps décalés de l'équipe.</p>
+<p>Le projet nous laisse surtout une leçon de méthode : les bugs les plus coûteux
+n'ont pas été détectés par les tests unitaires. La redirection <code>301</code> de la
+gateway, le désaccord de préfixe d'URL, les tests non hermétiques — tous
+passaient les contrôles automatisés et n'ont été révélés que par une exécution
+réelle en conteneurs. C'est ce qui nous a conduits à écrire une recette de 27
+contrôles qui exerce l'application déployée, et à l'intégrer au pipeline de
+livraison.</p>
+<hr />
+<p><sub>Rapport rédigé en août 2026 — Examen pratique DevOps, Master 1 Intelligence
+Artificielle, Dakar Institute of Technology.</sub></p></body></html>

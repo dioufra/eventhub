@@ -1,0 +1,398 @@
+/* =============================================================================
+   EventHub — feuille de style globale
+   Identité visuelle du Dakar Institute of Technology.
+
+   Poppins est auto-hébergée via @fontsource et déclarée dans angular.json :
+   aucune requête vers un CDN externe, l'application reste fonctionnelle
+   hors ligne et en conteneur.
+   ========================================================================== */
+
+:root {
+  /* ---- Palette DIT — dominante teal + blanc + orange ---- */
+  --dit-teal: #164955;
+  --dit-teal-logo: #004955;
+  --dit-teal-dark: #04323a;
+
+  --dit-orange: #f8a90c;
+  --dit-orange-dark: #e98f06;
+
+  --dit-white: #ffffff;
+  --dit-bg: #f7f9f9;
+  --dit-border: #dce5e6;
+  --dit-text-muted: #5f6f72;
+
+  /* ---- Secondaires : micro-accents uniquement (badges, statuts) ---- */
+  --dit-pink: #e770a5;
+  --dit-green: #8abe55;
+  --dit-blue: #5eb1e0;
+  --dit-yellow: #f8bf5d;
+
+  /* ---- Dérivés ---- */
+  --dit-text: #12262b;
+  --dit-teal-soft: #e8f0f1;
+  --dit-orange-soft: #fef3dc;
+  --dit-danger: #c0392b;
+  --dit-danger-soft: #fbeae8;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(4, 50, 58, 0.04);
+  --shadow: 0 2px 8px rgba(4, 50, 58, 0.06);
+  --shadow-lg: 0 12px 32px rgba(4, 50, 58, 0.14);
+
+  --sidebar-width: 248px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--dit-bg);
+  color: var(--dit-text);
+  font-family:
+    'Poppins',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+a {
+  color: var(--dit-teal);
+}
+
+/* =============================================================================
+   Boutons — factorisés en classes plutôt qu'en composant : moins de code,
+   utilisables sur <button> comme sur <a routerLink>.
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.62rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--dit-orange);
+  outline-offset: 2px;
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* CTA principal DIT */
+.btn--primary {
+  background: var(--dit-orange);
+  color: var(--dit-teal-dark);
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--dit-orange-dark);
+}
+
+.btn--teal {
+  background: var(--dit-teal);
+  color: var(--dit-white);
+}
+.btn--teal:hover:not(:disabled) {
+  background: var(--dit-teal-dark);
+}
+
+.btn--ghost {
+  background: var(--dit-white);
+  border-color: var(--dit-border);
+  color: var(--dit-teal);
+}
+.btn--ghost:hover:not(:disabled) {
+  border-color: var(--dit-teal);
+  background: var(--dit-teal-soft);
+}
+
+.btn--danger {
+  background: var(--dit-white);
+  border-color: #eccbc6;
+  color: var(--dit-danger);
+}
+.btn--danger:hover:not(:disabled) {
+  background: var(--dit-danger-soft);
+  border-color: var(--dit-danger);
+}
+
+.btn--sm {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.82rem;
+}
+
+/* =============================================================================
+   Cartes et surfaces
+   ========================================================================== */
+.card {
+  background: var(--dit-white);
+  border: 1px solid var(--dit-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card__body {
+  padding: 1.5rem;
+}
+
+.card__header {
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--dit-border);
+}
+
+.card__header h3 {
+  font-size: 1rem;
+}
+
+/* =============================================================================
+   Formulaires
+   ========================================================================== */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.35rem;
+}
+
+.field__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dit-text);
+}
+
+.field__label .req {
+  color: var(--dit-orange-dark);
+  margin-left: 0.15rem;
+}
+
+.field__hint {
+  font-size: 0.78rem;
+  color: var(--dit-text-muted);
+}
+
+.field__error {
+  font-size: 0.8rem;
+  color: var(--dit-danger);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--dit-border);
+  border-radius: var(--radius-sm);
+  background: var(--dit-white);
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--dit-text);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--dit-teal);
+  box-shadow: 0 0 0 3px rgba(22, 73, 85, 0.1);
+}
+
+.input.is-invalid,
+.select.is-invalid,
+.textarea.is-invalid {
+  border-color: var(--dit-danger);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+/* =============================================================================
+   Tableaux — scroll horizontal propre sur petit écran
+   ========================================================================== */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.85rem 1.1rem;
+  background: var(--dit-bg);
+  border-bottom: 1px solid var(--dit-border);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dit-text-muted);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--dit-border);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover {
+  background: #fbfcfc;
+}
+
+.table__actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.cell-strong {
+  font-weight: 600;
+}
+
+.cell-muted {
+  color: var(--dit-text-muted);
+  font-size: 0.86rem;
+}
+
+/* =============================================================================
+   Badges — seul endroit où les couleurs secondaires du logo apparaissent
+   ========================================================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge--open {
+  background: #eef6e6;
+  color: #4e7a24;
+}
+.badge--full {
+  background: var(--dit-danger-soft);
+  color: var(--dit-danger);
+}
+.badge--soon {
+  background: var(--dit-orange-soft);
+  color: var(--dit-orange-dark);
+}
+.badge--etudiant {
+  background: #e7f2fa;
+  color: #1f6d9c;
+}
+.badge--professeur {
+  background: #fbecf3;
+  color: #b0407a;
+}
+.badge--externe {
+  background: var(--dit-teal-soft);
+  color: var(--dit-teal);
+}
+.badge--cancelled {
+  background: #eef1f1;
+  color: var(--dit-text-muted);
+}
+
+/* =============================================================================
+   Alertes
+   ========================================================================== */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.alert--error {
+  background: var(--dit-danger-soft);
+  color: #8e2a1f;
+  border: 1px solid #eccbc6;
+}
+
+.alert--success {
+  background: #eef6e6;
+  color: #3f6a1c;
+  border: 1px solid #cfe3ba;
+}
+
+/* Avertissement : action refusée mais rien de cassé — orange DIT. */
+.alert--warn {
+  background: #fdf4e3;
+  border: 1px solid #f3d9a4;
+  color: #7a5410;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

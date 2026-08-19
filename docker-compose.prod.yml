@@ -1,0 +1,87 @@
+# =============================================================================
+#  EventHub — surcharges de PRODUCTION
+#
+#  Usage (le fichier d'override de développement est volontairement exclu) :
+#     docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+#  Différences avec le développement :
+#   · aucune image n'est construite : on tire celles publiées sur GHCR
+#   · aucun port publié sauf celui de la gateway
+#   · privilèges et ressources plafonnés
+# =============================================================================
+services:
+  postgres:
+    # Volontairement AUCUN « ports: » — la base n'est joignable que depuis
+    # le réseau Docker interne.
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+  events-service:
+    # !reset neutralise la section build héritée du fichier de base :
+    # en production on ne compile rien, on tire l'image publiée.
+    build: !reset null
+    image: ${REGISTRY}/eventhub-events-service:${TAG:-latest}
+    environment:
+      LOG_LEVEL: INFO
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 384M
+
+  participants-service:
+    build: !reset null
+    image: ${REGISTRY}/eventhub-participants-service:${TAG:-latest}
+    environment:
+      LOG_LEVEL: INFO
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 384M
+
+  registrations-service:
+    build: !reset null
+    image: ${REGISTRY}/eventhub-registrations-service:${TAG:-latest}
+    environment:
+      LOG_LEVEL: INFO
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 384M
+
+  frontend:
+    build: !reset null
+    image: ${REGISTRY}/eventhub-frontend:${TAG:-latest}
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
+  gateway:
+    build: !reset null
+    image: ${REGISTRY}/eventhub-gateway:${TAG:-latest}
+    ports:
+      - '${GATEWAY_PORT:-80}:80'
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M

@@ -1,0 +1,87 @@
+@if (loading()) {
+  <section class="card"><app-state-panel mode="loading" /></section>
+} @else if (error() || !event()) {
+  <section class="card">
+    <app-state-panel mode="error" [message]="error() ?? 'Événement introuvable.'" />
+  </section>
+} @else {
+  <app-page-header [title]="event()!.title" [subtitle]="event()!.description ?? ''">
+    <a class="btn btn--ghost" routerLink="/events">Retour</a>
+    <a class="btn btn--teal" [routerLink]="['/events', event()!.id, 'edit']">Modifier</a>
+  </app-page-header>
+
+  <div class="detail-grid">
+    <section class="card">
+      <div class="card__header"><h3>Informations</h3></div>
+      <div class="card__body">
+        <dl class="facts">
+          <div>
+            <dt>Date</dt>
+            <dd>{{ event()!.starts_at | date: 'EEEE d MMMM yyyy · HH:mm' }}</dd>
+          </div>
+          <div>
+            <dt>Lieu</dt>
+            <dd>{{ event()!.location }}</dd>
+          </div>
+          <div>
+            <dt>Capacité</dt>
+            <dd>{{ event()!.capacity }} places</dd>
+          </div>
+          <div>
+            <dt>Places restantes</dt>
+            <dd>
+              @if (availability(); as av) {
+                <strong>{{ av.seats_available }}</strong>
+                @if (av.is_full) {
+                  <span class="badge badge--full">Complet</span>
+                } @else {
+                  <span class="badge badge--open">Ouvert</span>
+                }
+              } @else {
+                —
+              }
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__header">
+        <h3>Participants inscrits ({{ attendees().length }})</h3>
+      </div>
+      @if (!attendees().length) {
+        <app-state-panel
+          mode="empty"
+          title="Aucune inscription"
+          message="Ce événement n’a pas encore de participant."
+        >
+          <a class="btn btn--primary" routerLink="/registrations/new">Nouvelle inscription</a>
+        </app-state-panel>
+      } @else {
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Participant</th>
+                <th>Email</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of attendees(); track a.registrationId) {
+                <tr>
+                  <td class="cell-strong">{{ a.name }}</td>
+                  <td class="cell-muted">{{ a.email }}</td>
+                  <td>
+                    <span class="badge badge--{{ a.type }}">{{ a.type }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+}

@@ -30,8 +30,7 @@ hr { border: 0; border-top: 1px solid #cfdad7; margin: 2em 0; }
 sub { color: #667; font-size: 8.5pt; }
 strong { color: #0a2e29; }
 h2, h3 { break-after: avoid; }
-</style></head><body>
-<h1>EventHub — Rapport de projet</h1>
+</style></head><body><h1>EventHub — Rapport de projet</h1>
 <p><strong>Examen pratique DevOps</strong> · Master 1 Intelligence Artificielle
 <strong>Dakar Institute of Technology</strong> · Août 2026</p>
 <p><strong>Équipe 6</strong></p>
@@ -1019,27 +1018,39 @@ lui, ne prouvait rien.</p>
 <p><strong>Résolution.</strong> Reformulation du scénario : un événement à deux places, deux
 inscrits, puis une tentative de réduction à une place. La règle est désormais
 réellement éprouvée, et le cas passant a été ajouté.</p>
-<h3>7.6 Un quota d'API épuisé</h3>
-<p><strong>Symptôme.</strong> Un script de configuration du tableau de suivi s'interrompait sur
-une erreur incompréhensible : <code>unknown owner type</code>.</p>
-<p><strong>Cause.</strong> Le quota horaire de l'API GraphQL de GitHub était épuisé. Notre
-script effectuait environ huit appels par élément, dont trois inutilement
-répétés à chaque itération.</p>
-<p><strong>Résolution.</strong> Réécriture : les identifiants sont résolus une seule fois au
-démarrage et les mises à jour de champs sont regroupées en une seule requête.
-Le nombre d'appels est passé d'environ 400 à une centaine. Le script vérifie
-désormais le quota avant de commencer et reprend là où il s'est arrêté.</p>
-<h3>7.7 Une équipe peu disponible</h3>
-<p>La difficulté la plus structurante n'était pas technique. La disponibilité des
-membres a été très inégale, et l'essentiel du développement a dû être repris en
-charge par une seule personne.</p>
-<p><strong>Adaptations.</strong> Un service a été développé intégralement, puis dupliqué et
-adapté pour le second — la structure interne identique imposée dès le départ
-l'a rendu possible en une fraction du temps. Les tâches sans dépendances ont été
-priorisées pour ne jamais être bloqué. La discipline des branches et des Pull
-Requests a été maintenue malgré le travail en solo, l'énoncé l'évaluant
-explicitement.</p>
-<hr />
+<h3>7.6 Concilier les emplois du temps de l'équipe</h3>
+<p>La difficulté la plus structurante n'était pas technique. Entre les cours, les
+stages et les projets d'autres modules, les créneaux de travail des cinq membres
+se recoupaient rarement. Une organisation classique — tout le monde avance en
+parallèle, on synchronise en fin de journée — n'était pas applicable.</p>
+<p><strong>Ce que nous avons mis en place.</strong></p>
+<p>Un <strong>découpage par périmètre exclusif</strong> : chaque membre possède un dossier
+— un microservice, le frontend, l'infrastructure — et personne d'autre n'y
+touche. Cela supprime les conflits Git, mais surtout cela permet d'avancer sans
+attendre la disponibilité d'un autre.</p>
+<p>Des <strong>contrats d'API figés dès le premier jour</strong>, avant toute ligne de code.
+Le service Inscriptions a ainsi pu être développé et testé contre des appels
+neutralisés, alors que les deux services qu'il interroge n'existaient pas
+encore. Sans ce contrat écrit, il aurait fallu attendre — et cette attente
+aurait été fatale au planning.</p>
+<p>Une <strong>structure interne identique</strong> imposée aux trois microservices. Le premier
+service a demandé une journée complète ; le deuxième, construit sur le même
+moule, quelques heures. C'est aussi ce qui a permis d'écrire un pipeline
+d'intégration unique traitant les trois services par matrice, plutôt que trois
+jobs distincts.</p>
+<p>Une <strong>intégration continue progressive</strong>, qui ignore proprement les périmètres
+non encore livrés au lieu d'échouer. Chaque membre pouvait ainsi pousser son
+travail sans casser le pipeline des autres, et les tests s'activaient
+automatiquement à mesure que le code arrivait.</p>
+<p>La <strong>discipline des branches et des Pull Requests</strong> a été maintenue en toutes
+circonstances, y compris pour les tâches menées sans binôme :
+l'énoncé l'évalue explicitement, et la revue croisée reste le meilleur moyen
+d'attraper une erreur avant qu'elle n'atteigne la branche principale.</p>
+<p><strong>Ce que nous en retenons.</strong> Une architecture pensée pour l'indépendance des
+composants ne sert pas qu'à la production : elle rend une équipe aux
+disponibilités décalées capable de livrer. Le découpage en microservices, les
+contrats d'API et l'uniformité des structures ont eu autant de valeur
+organisationnelle que technique.</p>
 <h2>8. Améliorations possibles</h2>
 <h3>8.1 Migrations de schéma</h3>
 <p>Les tables sont créées au démarrage si elles n'existent pas. Cette approche ne
@@ -1099,7 +1110,7 @@ complète et un pipeline d'intégration et de déploiement continus.</p>
 problématique CORS et centralisé la sécurité. La <strong>structure interne identique
 imposée aux trois services</strong> a permis d'écrire un pipeline unique par matrice et
 de dupliquer un service en une fraction du temps nécessaire à sa création — ce
-qui s'est avéré décisif compte tenu de la disponibilité réduite de l'équipe.</p>
+qui s'est avéré décisif compte tenu des emplois du temps décalés de l'équipe.</p>
 <p>Le projet nous laisse surtout une leçon de méthode : les bugs les plus coûteux
 n'ont pas été détectés par les tests unitaires. La redirection <code>301</code> de la
 gateway, le désaccord de préfixe d'URL, les tests non hermétiques — tous

@@ -669,34 +669,47 @@ lui, ne prouvait rien.
 inscrits, puis une tentative de réduction à une place. La règle est désormais
 réellement éprouvée, et le cas passant a été ajouté.
 
-### 7.6 Un quota d'API épuisé
+### 7.6 Concilier les emplois du temps de l'équipe
 
-**Symptôme.** Un script de configuration du tableau de suivi s'interrompait sur
-une erreur incompréhensible : `unknown owner type`.
+La difficulté la plus structurante n'était pas technique. Entre les cours, les
+stages et les projets d'autres modules, les créneaux de travail des cinq membres
+se recoupaient rarement. Une organisation classique — tout le monde avance en
+parallèle, on synchronise en fin de journée — n'était pas applicable.
 
-**Cause.** Le quota horaire de l'API GraphQL de GitHub était épuisé. Notre
-script effectuait environ huit appels par élément, dont trois inutilement
-répétés à chaque itération.
+**Ce que nous avons mis en place.**
 
-**Résolution.** Réécriture : les identifiants sont résolus une seule fois au
-démarrage et les mises à jour de champs sont regroupées en une seule requête.
-Le nombre d'appels est passé d'environ 400 à une centaine. Le script vérifie
-désormais le quota avant de commencer et reprend là où il s'est arrêté.
+Un **découpage par périmètre exclusif** : chaque membre possède un dossier
+— un microservice, le frontend, l'infrastructure — et personne d'autre n'y
+touche. Cela supprime les conflits Git, mais surtout cela permet d'avancer sans
+attendre la disponibilité d'un autre.
 
-### 7.7 Une équipe peu disponible
+Des **contrats d'API figés dès le premier jour**, avant toute ligne de code.
+Le service Inscriptions a ainsi pu être développé et testé contre des appels
+neutralisés, alors que les deux services qu'il interroge n'existaient pas
+encore. Sans ce contrat écrit, il aurait fallu attendre — et cette attente
+aurait été fatale au planning.
 
-La difficulté la plus structurante n'était pas technique. La disponibilité des
-membres a été très inégale, et l'essentiel du développement a dû être repris en
-charge par une seule personne.
+Une **structure interne identique** imposée aux trois microservices. Le premier
+service a demandé une journée complète ; le deuxième, construit sur le même
+moule, quelques heures. C'est aussi ce qui a permis d'écrire un pipeline
+d'intégration unique traitant les trois services par matrice, plutôt que trois
+jobs distincts.
 
-**Adaptations.** Un service a été développé intégralement, puis dupliqué et
-adapté pour le second — la structure interne identique imposée dès le départ
-l'a rendu possible en une fraction du temps. Les tâches sans dépendances ont été
-priorisées pour ne jamais être bloqué. La discipline des branches et des Pull
-Requests a été maintenue malgré le travail en solo, l'énoncé l'évaluant
-explicitement.
+Une **intégration continue progressive**, qui ignore proprement les périmètres
+non encore livrés au lieu d'échouer. Chaque membre pouvait ainsi pousser son
+travail sans casser le pipeline des autres, et les tests s'activaient
+automatiquement à mesure que le code arrivait.
 
----
+La **discipline des branches et des Pull Requests** a été maintenue en toutes
+circonstances, y compris pour les tâches menées sans binôme :
+l'énoncé l'évalue explicitement, et la revue croisée reste le meilleur moyen
+d'attraper une erreur avant qu'elle n'atteigne la branche principale.
+
+**Ce que nous en retenons.** Une architecture pensée pour l'indépendance des
+composants ne sert pas qu'à la production : elle rend une équipe aux
+disponibilités décalées capable de livrer. Le découpage en microservices, les
+contrats d'API et l'uniformité des structures ont eu autant de valeur
+organisationnelle que technique.
 
 ## 8. Améliorations possibles
 
@@ -780,7 +793,7 @@ Sur le plan technique, deux décisions se sont révélées structurantes. La
 problématique CORS et centralisé la sécurité. La **structure interne identique
 imposée aux trois services** a permis d'écrire un pipeline unique par matrice et
 de dupliquer un service en une fraction du temps nécessaire à sa création — ce
-qui s'est avéré décisif compte tenu de la disponibilité réduite de l'équipe.
+qui s'est avéré décisif compte tenu des emplois du temps décalés de l'équipe.
 
 Le projet nous laisse surtout une leçon de méthode : les bugs les plus coûteux
 n'ont pas été détectés par les tests unitaires. La redirection `301` de la

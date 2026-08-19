@@ -569,23 +569,44 @@ d'erreur et de liste vide.
 
 ### 6.4 Captures d'écran
 
-> **À insérer avant le rendu.** Placer les fichiers dans `docs/captures/`.
+Les fichiers sont dans `docs/captures/`.
 
-| Capture | Contenu attendu |
+**Interface** — parcours complet de l'application
+
+| Capture | Contenu |
 |---|---|
-| `01-evenements.png` | Liste des événements avec les places restantes |
-| `02-creation-evenement.png` | Formulaire de création |
-| `03-participants.png` | Liste et recherche |
-| `04-inscription.png` | Parcours d'inscription avec le résumé |
-| `05-evenement-complet.png` | Un événement complet, confirmation désactivée |
-| `06-compose-ps.png` | `docker compose ps` — les 6 conteneurs sains |
-| `07-swagger.png` | Documentation interactive d'un service |
-| `08-ci.png` | Un run CI entièrement vert |
-| `09-cd.png` | Un run CD jusqu'au déploiement |
-| `10-packages.png` | Les 5 images publiées sur GHCR |
-| `11-smoke.png` | Sortie de `make smoke` — 27 contrôles réussis |
-| `12-branches.png` | Le graphe des branches (Insights → Network) |
+| `01-evenements.png` | Liste des six événements : dates, lieux, capacités, places restantes, et l'état « Ouvert » ou « Complet » |
+| `02-creation-evenement.png` | Formulaire de création, champs obligatoires signalés |
+| `03-participants.png` | Liste des douze participants, recherche, et les trois types distingués par pastille |
+| `04-ajout-participant.png` | Formulaire participant, choix du type en trois cartes |
+| `05-inscriptions.png` | Inscriptions confirmées : participant, événement, date et lieu — données agrégées depuis **les trois services** |
+| `06-nouvelle-inscription.png` | Parcours guidé : sélection, résumé et confirmation. La Masterclass y apparaît grisée et marquée « Complet » — elle ne peut pas être sélectionnée |
 
+**Exploitation et chaîne DevOps**
+
+| Capture | Contenu |
+|---|---|
+| `07-compose-ps.png` | `docker compose ps` — les six conteneurs `healthy` |
+| `08-swagger.png` | Documentation OpenAPI d'un service, générée automatiquement |
+| `09-smoke.png` | Sortie de `make smoke` — 27 contrôles, 0 échec |
+| `10-ci.png` | Un run d'intégration continue entièrement vert, matrice des services visible |
+| `11-cd.png` | Le pipeline de livraison complet : tests, publication, déploiement et recette |
+| `12-packages.png` | Les cinq images publiées sur GitHub Container Registry |
+| `13-branches.png` | L'historique des fusions : `feature/*` → `develop` → `main`, chaque Pull Request numérotée |
+
+> Le graphe **Insights → Network** de GitHub n'est pas accessible sur les
+> dépôts privés en formule gratuite. Nous lui avons substitué la sortie de
+> `git log --graph`, qui montre la même information — et davantage : les
+> messages de commit et le numéro de chaque Pull Request fusionnée.
+
+La capture `06` mérite une mention : elle montre l'application interrogeant
+simultanément les trois microservices — la liste des événements avec leurs
+places restantes vient du service Événements, la liste des participants du
+service Participants, et la confirmation déclenchera l'orchestration décrite
+au § 2.3.
+
+
+---
 ---
 
 ## 7. Difficultés rencontrées et solutions

@@ -121,7 +121,19 @@ check "Place rendue disponible" "1" \
 check "Réinscription possible" 201 \
   "$(post_code "$BASE/api/registrations" "{\"event_id\":$EVENT_ID,\"participant_id\":$P2}")"
 
-# Nettoyage du jeu de test
+# Nettoyage du jeu de test.
+# Les inscriptions D'ABORD : supprimer un événement ne supprime pas les
+# inscriptions qui le référencent (aucune clé étrangère entre les bases),
+# elles deviendraient orphelines et resteraient affichées dans la liste.
+for r in $(curl -s "$BASE/api/registrations" | python3 -c "
+import sys, json
+rows = json.load(sys.stdin)
+cible = {$EVENT_ID, ${EVENT2:-0}}
+print(' '.join(str(r['id']) for r in rows if r['event_id'] in cible))
+" 2>/dev/null); do
+  curl -s -o /dev/null -X DELETE "$BASE/api/registrations/$r"
+done
+
 curl -s -o /dev/null -X DELETE "$BASE/api/events/$EVENT_ID"
 curl -s -o /dev/null -X DELETE "$BASE/api/events/${EVENT2:-0}"
 curl -s -o /dev/null -X DELETE "$BASE/api/participants/$P1"

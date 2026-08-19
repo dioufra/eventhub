@@ -69,9 +69,9 @@ export class RegistrationList {
               id: reg.id,
               status: reg.status,
               createdAt: reg.created_at ?? undefined,
-              participantName: participant?.full_name ?? `Participant #${reg.participant_id}`,
+              participantName: participant?.full_name ?? 'Participant supprimé',
               participantEmail: participant?.email ?? '—',
-              eventTitle: event?.title ?? `Événement #${reg.event_id}`,
+              eventTitle: event?.title ?? 'Événement supprimé',
               eventDate: event?.starts_at,
               eventLocation: event?.location ?? '—',
             };

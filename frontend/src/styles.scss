@@ -371,6 +371,13 @@ a {
   border: 1px solid #cfe3ba;
 }
 
+/* Avertissement : action refusée mais rien de cassé — orange DIT. */
+.alert--warn {
+  background: #fdf4e3;
+  border: 1px solid #f3d9a4;
+  color: #7a5410;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

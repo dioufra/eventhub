@@ -194,3 +194,43 @@ def test_stats_ignores_cancelled():
     client.delete(f"{BASE}/{created['id']}")
 
     assert client.get(f"{BASE}/stats").json()["total"] == 0
+
+
+def test_lost_race_releases_the_seat(stub_remote_services):
+    """Régression : neuf places perdues sur dix requêtes simultanées.
+
+    Quand une requête concurrente inscrit le couple entre notre contrôle
+    initial et l'écriture, la ligne était re-confirmée en silence — alors
+    qu'une place venait d'être réservée et n'était jamais rendue.
+
+    On simule la course en insérant la ligne « confirmed » directement en
+    base, sans passer par l'API : le contrôle initial de la requête suivante
+    ne la verra donc pas au bon moment.
+    """
+    from app import models
+
+    db = TestingSession()
+    db.add(models.Registration(event_id=42, participant_id=42, status="cancelled"))
+    db.commit()
+    db.close()
+
+    # 1re inscription : réutilise la ligne annulée, consomme une place.
+    assert client.post(BASE, json={"event_id": 42, "participant_id": 42}).status_code == 201
+    assert stub_remote_services["reserve"] == 1
+    assert stub_remote_services["release"] == 0
+
+    # 2e inscription sur un couple déjà confirmé : refusée ET place rendue.
+    response = client.post(BASE, json={"event_id": 42, "participant_id": 42})
+    assert response.status_code == 409
+    assert stub_remote_services["release"] == stub_remote_services["reserve"] - 1
+
+
+def test_duplicate_never_consumes_extra_seats(stub_remote_services):
+    """Cinq tentatives sur le même couple ne doivent coûter qu'une place."""
+    client.post(BASE, json={"event_id": 50, "participant_id": 50})
+    for _ in range(4):
+        assert client.post(BASE, json={"event_id": 50, "participant_id": 50}).status_code == 409
+
+    # Places nettes consommées = réservations - libérations.
+    net = stub_remote_services["reserve"] - stub_remote_services["release"]
+    assert net == 1, f"{net} places consommées au lieu d'une seule"

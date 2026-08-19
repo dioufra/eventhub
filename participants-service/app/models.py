@@ -7,7 +7,7 @@ from app.database import Base
 class Participant(Base):
     __tablename__ = "participants"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     full_name = Column(String(150), nullable=False, index=True)
     # unique=True : garantit au niveau BASE qu'un email n'est pas réutilisé,
     # même si deux requêtes arrivent exactement en même temps.

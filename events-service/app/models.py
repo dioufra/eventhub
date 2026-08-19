@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy import CheckConstraint, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -6,8 +6,17 @@ from app.database import Base
 
 class Event(Base):
     __tablename__ = "events"
+    __table_args__ = (
+        # Garde-fous au niveau BASE. La validation Pydantic couvre déjà l'API,
+        # mais elle ne protège pas d'une écriture directe ou d'un import.
+        CheckConstraint("capacity > 0", name="ck_events_capacity_positive"),
+        CheckConstraint("seats_taken >= 0", name="ck_events_seats_taken_positive"),
+        CheckConstraint(
+            "seats_taken <= capacity", name="ck_events_seats_within_capacity"
+        ),
+    )
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     # Index sur les deux colonnes servant aux filtres exigés par l'énoncé.

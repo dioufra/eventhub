@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import clients, models, schemas
@@ -127,6 +128,18 @@ def create_registration(
             )
             .first()
         )
+
+        if registration and registration.status == "confirmed":
+            # Une requête concurrente a inscrit ce couple entre notre contrôle
+            # initial et maintenant. Sans ce cas, la ligne était re-confirmée
+            # en silence alors qu'une place venait d'être consommée : dix
+            # requêtes simultanées mangeaient dix places pour une inscription.
+            db.rollback()
+            clients.release_seat(payload.event_id)
+            raise HTTPException(
+                status_code=409, detail="participant already registered for this event"
+            )
+
         if registration:
             # Réinscription après annulation : on réutilise la ligne.
             registration.status = "confirmed"
@@ -137,11 +150,23 @@ def create_registration(
                 status="confirmed",
             )
             db.add(registration)
+
         db.commit()
         db.refresh(registration)
+
+    except IntegrityError:
+        # Deux INSERT vraiment simultanés : la contrainte d'unicité en base
+        # tranche. Le perdant rend sa place et reçoit un 409, comme s'il
+        # avait été détecté par le contrôle applicatif.
+        db.rollback()
+        clients.release_seat(payload.event_id)
+        raise HTTPException(
+            status_code=409, detail="participant already registered for this event"
+        ) from None
+    except HTTPException:
+        raise
     except Exception:
-        # Compensation : la place réservée à l'étape 3 est rendue, sinon
-        # elle resterait bloquée pour toujours.
+        # Toute autre panne : on rend la place, sinon elle resterait bloquée.
         db.rollback()
         clients.release_seat(payload.event_id)
         raise

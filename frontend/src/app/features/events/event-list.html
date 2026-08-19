@@ -8,6 +8,10 @@
 @if (success()) {
   <p class="alert alert--success">{{ success() }}</p>
 }
+
+@if (blockedDelete()) {
+  <p class="alert alert--warn">{{ blockedDelete() }}</p>
+}
 @if (error() && rows().length) {
   <p class="alert alert--error">{{ error() }}</p>
 }

@@ -6,6 +6,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { AvailabilityOut, EventOut, EventsService } from '../../core/api/events';
+import { RegistrationOut, RegistrationsService } from '../../core/api/registrations';
 import { toUserMessage } from '../../core/utils/http-error';
 import { ConfirmDialog } from '../../shared/ui/confirm-dialog';
 import { PageHeader } from '../../shared/ui/page-header';
@@ -24,12 +25,15 @@ interface EventRow extends EventOut {
 })
 export class EventList {
   private readonly api = inject(EventsService);
+  private readonly registrationsApi = inject(RegistrationsService);
   private readonly router = inject(Router);
 
   readonly rows = signal<EventRow[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
+  /** Message affiché quand une suppression est refusée. */
+  readonly blockedDelete = signal<string | null>(null);
 
   /** Événement en attente de confirmation de suppression. */
   readonly pendingDelete = signal<EventRow | null>(null);
@@ -83,7 +87,27 @@ export class EventList {
   }
 
   askDelete(row: EventRow): void {
-    this.pendingDelete.set(row);
+    // Aucune clé étrangère ne relie les inscriptions aux événements : ils
+    // vivent dans des bases distinctes. Supprimer un événement laisserait
+    // donc des inscriptions orphelines, affichées sans titre ni date.
+    // On interroge le service inscriptions AVANT de proposer la suppression.
+    this.blockedDelete.set(null);
+    this.registrationsApi.listByEvent(row.id).subscribe({
+      next: (regs: RegistrationOut[]) => {
+        if (regs.length) {
+          this.blockedDelete.set(
+            `« ${row.title} » compte ${regs.length} inscription(s). ` +
+              'Annulez-les depuis l’écran Inscriptions avant de supprimer l’événement.',
+          );
+          setTimeout(() => this.blockedDelete.set(null), 6000);
+          return;
+        }
+        this.pendingDelete.set(row);
+      },
+      // Si le service inscriptions est injoignable, on laisse l'utilisateur
+      // décider plutôt que de bloquer une action légitime.
+      error: () => this.pendingDelete.set(row),
+    });
   }
 
   confirmDelete(): void {
